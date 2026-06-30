@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Upload, 
   Trash2, 
@@ -13,8 +13,6 @@ import {
   FileText,
   SlidersHorizontal,
   ChevronRight,
-  Database,
-  Eye,
   Activity,
   BarChart3,
   Cpu,
@@ -31,7 +29,8 @@ import {
   AlertTriangle,
   Radio,
   BrainCircuit,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-react';
 import { savePdfToDB, deletePdfFromDB } from '../utils/db';
 
@@ -61,7 +60,8 @@ export default function AdminPanel({
   onUnpublish, 
   onCreateDashboard, 
   onResetDefaults, 
-  onRenameDashboard 
+  onRenameDashboard,
+  onLogout
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // all, live, draft
@@ -119,7 +119,7 @@ export default function AdminPanel({
       const newDashboard = onCreateDashboard({
         name: newDashName.trim(),
         iconName: newDashIcon,
-        pdfType: newDashPdfType,
+        pdfType: newDashPdfType === 'upload' ? 'custom' : 'static',
         fileName: newDashPdfType === 'upload' ? newDashFile.name : `custom_${Date.now()}.pdf`,
         fileSize: newDashPdfType === 'upload' ? `${(newDashFile.size / (1024 * 1024)).toFixed(2)} MB` : 'Static System File',
         published: true // Publish immediately on creation
@@ -245,6 +245,7 @@ export default function AdminPanel({
   const totalCount = dashboards.length;
   const liveCount = dashboards.filter(d => d.published).length;
   const draftCount = totalCount - liveCount;
+  const customCount = dashboards.filter(d => d.published && d.pdfType === 'custom').length;
 
   // Filtered list
   const filteredDashboards = dashboards.filter(db => {
@@ -304,11 +305,11 @@ export default function AdminPanel({
 
         <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-amber-500 bg-white/60 dark:bg-[#0c0c0f]/60">
           <div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Local Storage DB</span>
-            <span className="text-xs font-bold text-amber-600 dark:text-amber-400 mt-2 block">IndexedDB Active</span>
+            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Custom PDF Uploads</span>
+            <span className="text-2xl font-extrabold text-amber-655 dark:text-amber-400 mt-1 block">{customCount} {customCount === 1 ? 'File' : 'Files'}</span>
           </div>
-          <div className="bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-xl text-amber-600 dark:text-amber-400">
-            <Database className="w-5 h-5" />
+          <div className="bg-amber-50 dark:bg-amber-955/30 p-2.5 rounded-xl text-amber-600 dark:text-amber-400">
+            <Upload className="w-5 h-5" />
           </div>
         </div>
       </div>
@@ -357,11 +358,20 @@ export default function AdminPanel({
                 showFeedback('success', 'Reset completed. All dashboards set back to unpublished draft.');
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-455 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
             title="Reset all settings to initial defaults"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Factory Reset</span>
+          </button>
+
+          <button 
+            onClick={onLogout}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-all cursor-pointer"
+            title="Log out from Admin Console"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Logout</span>
           </button>
           
           <button 
@@ -560,13 +570,15 @@ export default function AdminPanel({
                     ) : (
                       <div>
                         <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 block">{db.name}</span>
-                        <button 
-                          onClick={() => startEditing(db)}
-                          className="text-[10px] text-blue-500 hover:text-blue-600 hover:underline font-bold mt-0.5 flex items-center gap-1 cursor-pointer"
-                        >
-                          <Edit3 className="w-2.5 h-2.5" />
-                          <span>Rename</span>
-                        </button>
+                        {db.id > 17 && (
+                          <button 
+                            onClick={() => startEditing(db)}
+                            className="text-[10px] text-blue-500 hover:text-blue-600 hover:underline font-bold mt-0.5 flex items-center gap-1 cursor-pointer"
+                          >
+                            <Edit3 className="w-2.5 h-2.5" />
+                            <span>Rename</span>
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

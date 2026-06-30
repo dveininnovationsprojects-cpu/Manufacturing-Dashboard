@@ -2,55 +2,68 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sun,
   Moon,
-  FileText,
-  Settings,
-  LayoutDashboard,
-  Radio,
-  BrainCircuit,
-  BarChart3,
-  ShieldAlert,
   SlidersHorizontal,
-  Compass,
   ArrowRight,
-  Database,
   Grid
 } from 'lucide-react';
-import Dashboard from './components/Dashboard';
 import PdfViewer from './components/PdfViewer';
-import PowerBiGuide from './components/PowerBiGuide';
-import AdminPanel, { ICON_MAP } from './components/AdminPanel';
+import Dashboard from './components/Dashboard';
+import AdminPanel from './components/AdminPanel';
+import AdminLoginModal from './components/AdminLoginModal';
 import { clearAllPdfsFromDB } from './utils/db';
 
 // 17 Standard Dashboards base configuration
 const INITIAL_DASHBOARDS = [
-  { id: 1, name: '01. Executive Command Center', iconName: 'BarChart3', published: false },
-  { id: 2, name: '02. Production Analytics', iconName: 'Activity', published: false },
-  { id: 3, name: '03. Machine Efficiency & OEE', iconName: 'Cpu', published: false },
-  { id: 4, name: '04. Quality & Defect Analysis', iconName: 'CheckSquare', published: false },
-  { id: 5, name: '05. Downtime Tracker', iconName: 'Clock', published: false },
-  { id: 6, name: '06. Supply Chain & Logistics', iconName: 'Truck', published: false },
-  { id: 7, name: '07. Inventory & Warehouse', iconName: 'Archive', published: false },
-  { id: 8, name: '08. Energy & Emissions', iconName: 'Flame', published: false },
-  { id: 9, name: '09. Plant Performance', iconName: 'MapPin', published: false },
-  { id: 10, name: '10. Operator & Shift Stats', iconName: 'Users', published: false },
-  { id: 11, name: '11. Financial Cost & ROI', iconName: 'DollarSign', published: false },
-  { id: 12, name: '12. Safety & Compliance', iconName: 'ShieldCheck', published: false },
-  { id: 13, name: '13. AI Predictive Forecasting', iconName: 'TrendingUp', published: false },
-  { id: 14, name: '14. Anomaly Alerts', iconName: 'AlertTriangle', published: false },
-  { id: 15, name: '15. IoT Sensor Monitor', iconName: 'Radio', published: false },
-  { id: 16, name: '16. Drill-Through Audit', iconName: 'Cpu', published: false },
-  { id: 17, name: '17. AI Decision Support', iconName: 'BrainCircuit', published: false }
+  { id: 1, name: '1 – Executive Command Center', iconName: 'BarChart3', published: false },
+  { id: 2, name: '2 – Production Analytics', iconName: 'Activity', published: false },
+  { id: 3, name: '3 – Machine Performance', iconName: 'Cpu', published: false },
+  { id: 4, name: '4 – Predictive Maintenance', iconName: 'CheckSquare', published: false },
+  { id: 5, name: '5 – Quality Intelligence', iconName: 'Clock', published: false },
+  { id: 6, name: '6 – Supply Chain Analytics', iconName: 'Truck', published: false },
+  { id: 7, name: '7 – Inventory Intelligence', iconName: 'Archive', published: false },
+  { id: 8, name: '8 – Financial Analytics', iconName: 'Flame', published: false },
+  { id: 9, name: '9 – Workforce Analytics', iconName: 'MapPin', published: false },
+  { id: 10, name: '10 – Sustainability Dashboard', iconName: 'Users', published: false },
+  { id: 11, name: '11 – Customer Analytics', iconName: 'DollarSign', published: false },
+  { id: 12, name: '12 – Logistics Dashboard', iconName: 'ShieldCheck', published: false },
+  { id: 13, name: '13 – AI Forecasting', iconName: 'TrendingUp', published: false },
+  { id: 14, name: '14 – Root Cause Analysis', iconName: 'AlertTriangle', published: false },
+  { id: 15, name: '15 – Real-Time Factory Monitoring', iconName: 'Radio', published: false },
+  { id: 16, name: '16 – Drill-Through Analytics', iconName: 'Cpu', published: false },
+  { id: 17, name: '17 – AI Insights & Decision Intelligence', iconName: 'BrainCircuit', published: false }
 ];
 
 export default function App() {
   const [dashboards, setDashboards] = useState(() => {
     const saved = localStorage.getItem('enterprise_dashboards');
-    return saved ? JSON.parse(saved) : INITIAL_DASHBOARDS;
+    if (!saved) return INITIAL_DASHBOARDS;
+    
+    // Auto-migrate standard dashboard names if they contain the old name format
+    try {
+      const parsed = JSON.parse(saved);
+      return parsed.map(db => {
+        if (db.id <= 17) {
+          const foundDefault = INITIAL_DASHBOARDS.find(d => d.id === db.id);
+          if (foundDefault) {
+            return {
+              ...db,
+              name: foundDefault.name
+            };
+          }
+        }
+        return db;
+      });
+    } catch {
+      return INITIAL_DASHBOARDS;
+    }
   });
 
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
+    return localStorage.getItem('admin_logged_in') === 'true';
+  });
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [selectedDashboardId, setSelectedDashboardId] = useState(null);
-  const [activeTab, setActiveTab] = useState('pdf');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Synchronize dynamic dashboards list to localStorage
@@ -82,7 +95,7 @@ export default function App() {
     } else {
       setSelectedDashboardId(null);
     }
-  }, [dashboards, selectedDashboardId]);
+  }, [publishedDashboards, selectedDashboardId]);
 
   // Get active dashboard metadata object
   const activeDashboard = publishedDashboards.find(d => d.id === selectedDashboardId);
@@ -166,180 +179,63 @@ export default function App() {
     setSelectedDashboardId(null);
   };
 
+  // Callback to log out admin
+  const handleLogout = () => {
+    setIsAdminLoggedIn(false);
+    setIsAdminMode(false);
+    localStorage.removeItem('admin_logged_in');
+  };
+
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#09090b] text-zinc-900 dark:text-zinc-50 transition-colors duration-300 flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAF8F5] via-[#FAF6EE] to-[#FFFDF9] dark:from-[#0c0c0f] dark:via-[#09090b] dark:to-[#121214] text-zinc-900 dark:text-zinc-50 transition-colors duration-300 flex">
       
-      {/* 1. Left Sidebar - Only visible in User Mode */}
-      {!isAdminMode && (
-        <aside className="w-72 bg-white dark:bg-[#0c0c0f] border-r border-zinc-200 dark:border-zinc-800 flex flex-col h-screen fixed left-0 top-0 z-40 transition-colors duration-300">
-          
-          {/* Logo Section */}
-          <div className="p-5 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-3 bg-zinc-50/50 dark:bg-zinc-950/10">
-            <div className="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white p-2 rounded-lg shadow-md shadow-blue-500/20">
-              <LayoutDashboard className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-700 dark:from-white dark:via-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent">
-                Enterprise Analytics
-              </h2>
-              <p className="text-[10px] text-zinc-500 dark:text-zinc-400 font-bold tracking-wider uppercase mt-0.5">
-                Manufacturing Systems
-              </p>
-            </div>
-          </div>
-
-          {/* Published Dashboards List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-thin">
-            <div className="flex items-center justify-between px-3 mb-2">
-              <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">
-                Live Dashboards ({publishedDashboards.length})
-              </span>
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-
-            {publishedDashboards.length === 0 ? (
-              <div className="px-3 py-6 text-center border border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50/30 dark:bg-zinc-950/10 space-y-2 mt-2">
-                <Compass className="w-8 h-8 text-zinc-300 dark:text-zinc-700 mx-auto" />
-                <p className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">No active publications</p>
-              </div>
-            ) : (
-              publishedDashboards.map((db) => {
-                const IconComponent = ICON_MAP[db.iconName] || BarChart3;
-                const isSelected = db.id === selectedDashboardId;
-                return (
-                  <button
-                    key={db.id}
-                    onClick={() => setSelectedDashboardId(db.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left cursor-pointer ${
-                      isSelected
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/10'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900/60 hover:text-zinc-900 dark:hover:text-zinc-200'
-                    }`}
-                  >
-                    <IconComponent className={`w-4 h-4 shrink-0 ${isSelected ? 'text-white' : 'text-zinc-400 dark:text-zinc-500'}`} />
-                    <span className="truncate">{db.name}</span>
-                  </button>
-                );
-              })
-            )}
-          </div>
-
-          {/* Sidebar Footer */}
-          <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 text-[10px] text-zinc-400 dark:text-zinc-500 font-bold text-center flex flex-col gap-1 bg-zinc-50/20 dark:bg-zinc-950/5">
-            <div>v1.5.0 • Enterprise License</div>
-            <div className="text-[8px] font-medium text-zinc-400 dark:text-zinc-650">Local Browser DB Store Active</div>
-          </div>
-        </aside>
-      )}
-
-      {/* 2. Main content Pane */}
-      <div className={`flex-1 flex flex-col min-h-screen ${!isAdminMode ? 'pl-72' : ''}`}>
+      {/* Main content Pane */}
+      <div className="flex-1 flex flex-col min-h-screen">
         
         {/* Dynamic Navigation Header */}
-        <header className={`border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-[#0c0c0f]/80 backdrop-blur-md sticky top-0 z-30 transition-colors duration-300`}>
-          <div className="w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <header className="border-b border-zinc-200/50 dark:border-zinc-800/40 bg-white/70 dark:bg-[#0c0c0f]/60 backdrop-blur-md sticky top-0 z-30 transition-colors duration-300">
+          <div className="w-full px-6 py-3 flex items-center justify-between gap-4">
             
-            {/* Header Title Section */}
-            {isAdminMode ? (
-              <div className="flex items-center gap-3">
-                <div className="bg-rose-500 text-white p-2 rounded-xl">
-                  <ShieldAlert className="w-5 h-5" />
-                </div>
-                <div>
-                  <h1 className="text-base font-extrabold text-zinc-950 dark:text-white flex items-center gap-2">
-                    System Administrator Console
-                  </h1>
-                  <p className="text-[10px] text-rose-500 font-extrabold tracking-widest uppercase mt-0.5">
-                    Authorized Access Only
-                  </p>
-                </div>
-              </div>
-            ) : activeDashboard ? (
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <h1 className="text-base font-extrabold text-zinc-900 dark:text-white">
-                    {activeDashboard.name}
-                  </h1>
-                </div>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
-                  Dynamic Reporting Console • Pushed Live
-                </p>
-              </div>
-            ) : (
-              <div>
-                <h1 className="text-base font-extrabold text-zinc-900 dark:text-white">
-                  Enterprise Analytics Terminal
+            {/* Left/Middle Section: Dashboard Horizontal Navigation Tabs */}
+            {!isAdminMode && publishedDashboards.length > 0 && (
+              <nav className="flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none bg-zinc-100/60 dark:bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-200/50 dark:border-zinc-805/30 mr-4">
+                {publishedDashboards.map((db) => {
+                  const isSelected = db.id === selectedDashboardId;
+                  return (
+                    <button
+                      key={db.id}
+                      onClick={() => setSelectedDashboardId(db.id)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${
+                        isSelected
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
+                          : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-200'
+                      }`}
+                      title={db.name}
+                    >
+                      {db.name}
+                    </button>
+                  );
+                })}
+              </nav>
+            )}
+
+            {/* Middle Section: Admin Title (when in Admin mode) */}
+            {isAdminMode && (
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
+                <h1 className="text-xs font-extrabold tracking-wider uppercase text-zinc-900 dark:text-white">
+                  System Administrator Console
                 </h1>
-                <p className="text-[10px] text-zinc-450 dark:text-zinc-550 font-bold uppercase tracking-wider mt-0.5">
-                  Standby Mode • Awaiting Connection
-                </p>
               </div>
             )}
 
-            {/* View Indicators (Hidden in Admin Mode) */}
-            {!isAdminMode && activeDashboard && (
-              <div className="hidden lg:flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider">
-                <span className="flex items-center gap-1 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-450 px-2.5 py-1 rounded-full border border-emerald-100 dark:border-emerald-900/30">
-                  <Radio className="w-3.5 h-3.5 animate-pulse" />
-                  Sensors Live
-                </span>
-                <span className="flex items-center gap-1 bg-blue-50 dark:bg-blue-950/20 text-blue-600 dark:text-blue-450 px-2.5 py-1 rounded-full border border-blue-100 dark:border-blue-900/30">
-                  <BrainCircuit className="w-3.5 h-3.5" />
-                  AI Models Online
-                </span>
-              </div>
-            )}
-
-            {/* Controls (Tabs, Mode toggle, Admin Toggle) */}
-            <div className="flex items-center gap-3 ml-auto sm:ml-0">
-              
-              {/* Tab Selector (Only when dashboards exist and not in Admin Mode) */}
-              {!isAdminMode && activeDashboard && (
-                <div className="bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200/50 dark:border-zinc-800/50 p-1 rounded-xl flex shadow-sm">
-                  <button
-                    onClick={() => setActiveTab('pdf')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'pdf'
-                        ? 'bg-white dark:bg-zinc-850 text-blue-600 dark:text-blue-450 shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-                    }`}
-                    title="Show PDF Embedded view"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">PDF Dashboard</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('interactive')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'interactive'
-                        ? 'bg-white dark:bg-zinc-850 text-blue-600 dark:text-blue-450 shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-                    }`}
-                    title="Show native React UI elements & charts"
-                  >
-                    <BarChart3 className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">Interactive Charts</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('guide')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      activeTab === 'guide'
-                        ? 'bg-white dark:bg-zinc-850 text-blue-600 dark:text-blue-450 shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-                    }`}
-                    title="Show Microsoft integration guides"
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    <span className="hidden md:inline">Embed Guide</span>
-                  </button>
-                </div>
-              )}
+            {/* Right Section: Theme Toggle and Admin Toggle */}
+            <div className="flex items-center gap-3 shrink-0">
 
               {/* Theme Toggle */}
               <button
                 onClick={() => setIsDarkMode(!isDarkMode)}
-                className="p-2.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-[#0c0c0f] text-zinc-550 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all shadow-sm cursor-pointer"
+                className="p-2.5 rounded-xl border border-zinc-200/60 dark:border-zinc-800/60 bg-white dark:bg-[#0c0c0f] text-zinc-550 hover:text-zinc-850 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all shadow-sm cursor-pointer"
                 title={isDarkMode ? "Light Mode" : "Dark Mode"}
               >
                 {isDarkMode ? <Sun className="w-4 h-4 text-amber-500 animate-spin-slow" /> : <Moon className="w-4 h-4 text-indigo-500" />}
@@ -347,10 +243,20 @@ export default function App() {
 
               {/* Admin Mode Toggle */}
               <button
-                onClick={() => setIsAdminMode(!isAdminMode)}
+                onClick={() => {
+                  if (isAdminMode) {
+                    setIsAdminMode(false);
+                  } else {
+                    if (isAdminLoggedIn) {
+                      setIsAdminMode(true);
+                    } else {
+                      setShowLoginModal(true);
+                    }
+                  }
+                }}
                 className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm border cursor-pointer ${
                   isAdminMode 
-                    ? 'bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-200/40 hover:bg-rose-100/40' 
+                    ? 'bg-rose-50 dark:bg-rose-955/20 text-rose-600 dark:text-rose-455 border-rose-250/40 hover:bg-rose-100/40' 
                     : 'bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:text-blue-500'
                 }`}
               >
@@ -374,6 +280,7 @@ export default function App() {
               onCreateDashboard={handleCreateDashboard}
               onResetDefaults={handleResetDefaults}
               onRenameDashboard={handleRenameDashboard}
+              onLogout={handleLogout}
             />
           ) : publishedDashboards.length === 0 ? (
             /* Empty State Landing Page for User Mode */
@@ -414,8 +321,14 @@ export default function App() {
 
                 {/* Call-to-action button */}
                 <button
-                  onClick={() => setIsAdminMode(true)}
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-750 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-550/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                  onClick={() => {
+                    if (isAdminLoggedIn) {
+                      setIsAdminMode(true);
+                    } else {
+                      setShowLoginModal(true);
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-755 text-white font-extrabold text-xs py-3 px-6 rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-550/20 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <span>Go to Admin Console</span>
                   <ArrowRight className="w-4 h-4" />
@@ -423,31 +336,23 @@ export default function App() {
               </div>
             </div>
           ) : activeDashboard ? (
-            /* Render Active Tab Views */
-            <>
-              {activeTab === 'pdf' && (
-                <PdfViewer 
-                  dashboardId={selectedDashboardId} 
-                  dashboardName={activeDashboard.name} 
-                  pdfType={activeDashboard.pdfType}
-                  fileName={activeDashboard.fileName}
-                  fileSize={activeDashboard.fileSize}
-                />
-              )}
-              {activeTab === 'interactive' && (
-                <Dashboard 
-                  isDarkMode={isDarkMode} 
-                  dashboardId={selectedDashboardId} 
-                  dashboardName={activeDashboard.name} 
-                />
-              )}
-              {activeTab === 'guide' && (
-                <PowerBiGuide 
-                  dashboardId={selectedDashboardId} 
-                  dashboardName={activeDashboard.name} 
-                />
-              )}
-            </>
+            activeDashboard.pdfType === 'custom' ? (
+              /* Render Active Dashboard PDF */
+              <PdfViewer 
+                dashboardId={selectedDashboardId} 
+                dashboardName={activeDashboard.name} 
+                pdfType={activeDashboard.pdfType}
+                fileName={activeDashboard.fileName}
+                fileSize={activeDashboard.fileSize}
+              />
+            ) : (
+              /* Render Default Static Interactive Dashboard UI */
+              <Dashboard 
+                isDarkMode={isDarkMode} 
+                dashboardId={selectedDashboardId} 
+                dashboardName={activeDashboard.name} 
+              />
+            )
           ) : null}
         </main>
 
@@ -455,6 +360,18 @@ export default function App() {
         <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-500">
           <p>© 2026 Enterprise Manufacturing Analytics. Secure administrative data synchronization active.</p>
         </footer>
+
+        {/* Admin Login Modal */}
+        <AdminLoginModal
+          isOpen={showLoginModal}
+          onClose={() => setShowLoginModal(false)}
+          onLoginSuccess={() => {
+            setIsAdminLoggedIn(true);
+            localStorage.setItem('admin_logged_in', 'true');
+            setIsAdminMode(true);
+            setShowLoginModal(false);
+          }}
+        />
 
       </div>
     </div>
