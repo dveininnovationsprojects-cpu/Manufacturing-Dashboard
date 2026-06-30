@@ -7,7 +7,6 @@ import {
   Grid
 } from 'lucide-react';
 import PdfViewer from './components/PdfViewer';
-import Dashboard from './components/Dashboard';
 import AdminPanel from './components/AdminPanel';
 import AdminLoginModal from './components/AdminLoginModal';
 import { clearAllPdfsFromDB } from './utils/db';
@@ -299,7 +298,7 @@ export default function App() {
 
                 <div className="space-y-2.5">
                   <span className="inline-flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-800 px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest">
-                    🔒 Standby Status
+                    Standby Status
                   </span>
                   <h2 className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-900 via-zinc-800 to-zinc-700 dark:from-white dark:via-zinc-200 dark:to-zinc-400 bg-clip-text text-transparent">
                     Analytics Console Offline
@@ -336,23 +335,14 @@ export default function App() {
               </div>
             </div>
           ) : activeDashboard ? (
-            activeDashboard.pdfType === 'custom' ? (
-              /* Render Active Dashboard PDF */
-              <PdfViewer 
-                dashboardId={selectedDashboardId} 
-                dashboardName={activeDashboard.name} 
-                pdfType={activeDashboard.pdfType}
-                fileName={activeDashboard.fileName}
-                fileSize={activeDashboard.fileSize}
-              />
-            ) : (
-              /* Render Default Static Interactive Dashboard UI */
-              <Dashboard 
-                isDarkMode={isDarkMode} 
-                dashboardId={selectedDashboardId} 
-                dashboardName={activeDashboard.name} 
-              />
-            )
+            /* Render Active Dashboard PDF */
+            <PdfViewer 
+              dashboardId={selectedDashboardId} 
+              dashboardName={activeDashboard.name} 
+              pdfType={activeDashboard.pdfType}
+              fileName={activeDashboard.fileName}
+              fileSize={activeDashboard.fileSize}
+            />
           ) : null}
         </main>
 

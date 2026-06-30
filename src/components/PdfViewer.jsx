@@ -30,18 +30,10 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType }) {
           }
         } else {
           // Standard static path fallback
-          const specificPath = `/dashboard_${dashboardId}.pdf`;
-          try {
-            const checkRes = await fetch(specificPath, { method: 'HEAD' });
-            if (!isMounted) return;
-            if (checkRes.ok) {
-              setPdfUrl(specificPath);
-            } else {
-              setPdfUrl('/dashboard.pdf');
-            }
-          } catch {
-            if (!isMounted) return;
+          if (dashboardId === 2) {
             setPdfUrl('/dashboard.pdf');
+          } else {
+            setPdfUrl(`/dashboard_${dashboardId}.pdf`);
           }
         }
       } catch (err) {
