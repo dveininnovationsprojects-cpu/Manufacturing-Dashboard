@@ -1,14 +1,14 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-// Firebase configuration using Vite environment variables
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || ""
+  apiKey: "AIzaSyALI5b2AlwAkQ1Uzh6k2yHVL-7HE7TBCXw",
+  authDomain: "manufacturing-dashboard-3365a.firebaseapp.com",
+  projectId: "manufacturing-dashboard-3365a",
+  storageBucket: "manufacturing-dashboard-3365a.firebasestorage.app",
+  messagingSenderId: "974650953683",
+  appId: "1:974650953683:web:6c64fe9fd6722c5d956926",
+  measurementId: "G-8QCLS5NM1M"
 };
 
 let db = null;

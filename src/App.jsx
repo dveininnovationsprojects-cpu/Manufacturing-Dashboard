@@ -146,10 +146,10 @@ export default function App() {
           return { 
             ...db, 
             published: false, 
-            pdfType: undefined, 
-            fileName: undefined, 
-            fileSize: undefined,
-            pushedAt: undefined
+            pdfType: null, 
+            fileName: null, 
+            fileSize: null,
+            pushedAt: null
           };
         }
         return db;
