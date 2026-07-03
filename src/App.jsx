@@ -10,6 +10,8 @@ import PdfViewer from './components/PdfViewer';
 import AdminPanel from './components/AdminPanel';
 import AdminLoginModal from './components/AdminLoginModal';
 import { clearAllPdfsFromDB } from './utils/db';
+import { db } from './firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 // 17 Standard Dashboards base configuration
 const INITIAL_DASHBOARDS = [
@@ -78,40 +80,35 @@ export default function App() {
     localStorage.setItem('enterprise_dashboards', JSON.stringify(dashboards));
   }, [dashboards]);
 
-  // Synchronize dynamic dashboards list from cloud KV store on mount
+  // Synchronize dynamic dashboards list from Firebase Firestore on mount
   useEffect(() => {
-    async function loadFromCloud() {
-      try {
-        const res = await fetch(`https://extendsclass.com/api/json-storage/bin/bbccfad?t=${Date.now()}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-          }
-        });
-        if (res.status === 200) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setDashboards(data);
-          }
+    if (!db) return;
+
+    // Real-time snapshot listener on the 'state' document of 'dashboard_settings' collection
+    const unsub = onSnapshot(doc(db, "dashboard_settings", "state"), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data().list;
+        if (Array.isArray(data) && data.length > 0) {
+          setDashboards(data);
         }
-      } catch (e) {
-        console.warn("Failed to load dashboards state from cloud sync service:", e);
       }
-    }
-    loadFromCloud();
+    }, (err) => {
+      console.warn("Firebase Firestore listener failed: ", err);
+    });
+
+    return () => unsub();
   }, []);
 
-  // Helper to synchronize local updates with the cloud KV store
+  // Helper to synchronize local updates with Firebase Firestore
   const syncDashboardsToCloud = async (updatedList) => {
+    if (!db) return;
     try {
-      await fetch('https://extendsclass.com/api/json-storage/bin/bbccfad', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedList)
+      await setDoc(doc(db, "dashboard_settings", "state"), {
+        list: updatedList,
+        updatedAt: new Date().toISOString()
       });
     } catch (e) {
-      console.warn("Failed to sync updated dashboards to cloud sync service:", e);
+      console.warn("Failed to sync updated dashboards to Firebase Firestore:", e);
     }
   };
 
