@@ -35,37 +35,7 @@ const INITIAL_DASHBOARDS = [
 ];
 
 export default function App() {
-  const [dashboards, setDashboards] = useState(() => {
-    const saved = localStorage.getItem('enterprise_dashboards');
-    const migrated = localStorage.getItem('enterprise_dashboards_migrated_v3');
-    
-    if (!saved || !migrated) {
-      localStorage.setItem('enterprise_dashboards_migrated_v3', 'true');
-      return INITIAL_DASHBOARDS;
-    }
-    
-    // Auto-migrate standard dashboard names and configurations without forcing published state on reload
-    try {
-      const parsed = JSON.parse(saved);
-      return parsed.map(db => {
-        if (db.id <= 17) {
-          const foundDefault = INITIAL_DASHBOARDS.find(d => d.id === db.id);
-          if (foundDefault) {
-            return {
-              ...db,
-              name: foundDefault.name,
-              pdfType: db.pdfType || 'static',
-              fileName: db.fileName || foundDefault.fileName,
-              fileSize: db.fileSize || foundDefault.fileSize
-            };
-          }
-        }
-        return db;
-      });
-    } catch {
-      return INITIAL_DASHBOARDS;
-    }
-  });
+  const [dashboards, setDashboards] = useState(INITIAL_DASHBOARDS);
 
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
@@ -75,21 +45,26 @@ export default function App() {
   const [selectedDashboardId, setSelectedDashboardId] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Synchronize dynamic dashboards list to localStorage
-  useEffect(() => {
-    localStorage.setItem('enterprise_dashboards', JSON.stringify(dashboards));
-  }, [dashboards]);
-
-  // Synchronize dynamic dashboards list from Firebase Firestore on mount
+  // Synchronize dynamic dashboards list from Firebase Firestore on mount and auto-initialize if blank
   useEffect(() => {
     if (!db) return;
 
     // Real-time snapshot listener on the 'state' document of 'dashboard_settings' collection
-    const unsub = onSnapshot(doc(db, "dashboard_settings", "state"), (docSnap) => {
+    const unsub = onSnapshot(doc(db, "dashboard_settings", "state"), async (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data().list;
         if (Array.isArray(data) && data.length > 0) {
           setDashboards(data);
+        }
+      } else {
+        // Initialize Firestore with default dashboards list if document doesn't exist
+        try {
+          await setDoc(doc(db, "dashboard_settings", "state"), {
+            list: INITIAL_DASHBOARDS,
+            updatedAt: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn("Failed to initialize Firestore document: ", e);
         }
       }
     }, (err) => {
