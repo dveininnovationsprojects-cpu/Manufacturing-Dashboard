@@ -13,31 +13,36 @@ import { clearAllPdfsFromDB } from './utils/db';
 
 // 17 Standard Dashboards base configuration
 const INITIAL_DASHBOARDS = [
-  { id: 1, name: '1 – Executive Command Center', iconName: 'BarChart3', published: false },
-  { id: 2, name: '2 – Production Analytics', iconName: 'Activity', published: false },
-  { id: 3, name: '3 – Machine Performance', iconName: 'Cpu', published: false },
-  { id: 4, name: '4 – Predictive Maintenance', iconName: 'CheckSquare', published: false },
-  { id: 5, name: '5 – Quality Intelligence', iconName: 'Clock', published: false },
-  { id: 6, name: '6 – Supply Chain Analytics', iconName: 'Truck', published: false },
-  { id: 7, name: '7 – Inventory Intelligence', iconName: 'Archive', published: false },
-  { id: 8, name: '8 – Financial Analytics', iconName: 'Flame', published: false },
-  { id: 9, name: '9 – Workforce Analytics', iconName: 'MapPin', published: false },
-  { id: 10, name: '10 – Sustainability Dashboard', iconName: 'Users', published: false },
-  { id: 11, name: '11 – Customer Analytics', iconName: 'DollarSign', published: false },
-  { id: 12, name: '12 – Logistics Dashboard', iconName: 'ShieldCheck', published: false },
-  { id: 13, name: '13 – AI Forecasting', iconName: 'TrendingUp', published: false },
-  { id: 14, name: '14 – Root Cause Analysis', iconName: 'AlertTriangle', published: false },
-  { id: 15, name: '15 – Real-Time Factory Monitoring', iconName: 'Radio', published: false },
-  { id: 16, name: '16 – Drill-Through Analytics', iconName: 'Cpu', published: false },
-  { id: 17, name: '17 – AI Insights & Decision Intelligence', iconName: 'BrainCircuit', published: false }
+  { id: 1, name: '1 – Executive Command Center', iconName: 'BarChart3', published: true, pdfType: 'static', fileName: 'dashboard_1.pdf', fileSize: 'Static Folder File' },
+  { id: 2, name: '2 – Production Analytics', iconName: 'Activity', published: true, pdfType: 'static', fileName: 'dashboard.pdf', fileSize: 'Static Folder File' },
+  { id: 3, name: '3 – Machine Performance', iconName: 'Cpu', published: true, pdfType: 'static', fileName: 'dashboard_3.pdf', fileSize: 'Static Folder File' },
+  { id: 4, name: '4 – Predictive Maintenance', iconName: 'CheckSquare', published: true, pdfType: 'static', fileName: 'dashboard_4.pdf', fileSize: 'Static Folder File' },
+  { id: 5, name: '5 – Quality Intelligence', iconName: 'Clock', published: true, pdfType: 'static', fileName: 'dashboard_5.pdf', fileSize: 'Static Folder File' },
+  { id: 6, name: '6 – Supply Chain Analytics', iconName: 'Truck', published: true, pdfType: 'static', fileName: 'dashboard_6.pdf', fileSize: 'Static Folder File' },
+  { id: 7, name: '7 – Inventory Intelligence', iconName: 'Archive', published: true, pdfType: 'static', fileName: 'dashboard_7.pdf', fileSize: 'Static Folder File' },
+  { id: 8, name: '8 – Financial Analytics', iconName: 'Flame', published: true, pdfType: 'static', fileName: 'dashboard_8.pdf', fileSize: 'Static Folder File' },
+  { id: 9, name: '9 – Workforce Analytics', iconName: 'MapPin', published: true, pdfType: 'static', fileName: 'dashboard_9.pdf', fileSize: 'Static Folder File' },
+  { id: 10, name: '10 – Sustainability Dashboard', iconName: 'Users', published: true, pdfType: 'static', fileName: 'dashboard_10.pdf', fileSize: 'Static Folder File' },
+  { id: 11, name: '11 – Customer Analytics', iconName: 'DollarSign', published: true, pdfType: 'static', fileName: 'dashboard_11.pdf', fileSize: 'Static Folder File' },
+  { id: 12, name: '12 – Logistics Dashboard', iconName: 'ShieldCheck', published: true, pdfType: 'static', fileName: 'dashboard_12.pdf', fileSize: 'Static Folder File' },
+  { id: 13, name: '13 – AI Forecasting', iconName: 'TrendingUp', published: true, pdfType: 'static', fileName: 'dashboard_13.pdf', fileSize: 'Static Folder File' },
+  { id: 14, name: '14 – Root Cause Analysis', iconName: 'AlertTriangle', published: true, pdfType: 'static', fileName: 'dashboard_14.pdf', fileSize: 'Static Folder File' },
+  { id: 15, name: '15 – Real-Time Factory Monitoring', iconName: 'Radio', published: true, pdfType: 'static', fileName: 'dashboard_15.pdf', fileSize: 'Static Folder File' },
+  { id: 16, name: '16 – Drill-Through Analytics', iconName: 'Cpu', published: true, pdfType: 'static', fileName: 'dashboard_16.pdf', fileSize: 'Static Folder File' },
+  { id: 17, name: '17 – AI Insights & Decision Intelligence', iconName: 'BrainCircuit', published: true, pdfType: 'static', fileName: 'dashboard_17.pdf', fileSize: 'Static Folder File' }
 ];
 
 export default function App() {
   const [dashboards, setDashboards] = useState(() => {
     const saved = localStorage.getItem('enterprise_dashboards');
-    if (!saved) return INITIAL_DASHBOARDS;
+    const migrated = localStorage.getItem('enterprise_dashboards_migrated_v3');
     
-    // Auto-migrate standard dashboard names if they contain the old name format
+    if (!saved || !migrated) {
+      localStorage.setItem('enterprise_dashboards_migrated_v3', 'true');
+      return INITIAL_DASHBOARDS;
+    }
+    
+    // Auto-migrate standard dashboard names and configurations without forcing published state on reload
     try {
       const parsed = JSON.parse(saved);
       return parsed.map(db => {
@@ -46,7 +51,10 @@ export default function App() {
           if (foundDefault) {
             return {
               ...db,
-              name: foundDefault.name
+              name: foundDefault.name,
+              pdfType: db.pdfType || 'static',
+              fileName: db.fileName || foundDefault.fileName,
+              fileSize: db.fileSize || foundDefault.fileSize
             };
           }
         }
@@ -69,6 +77,37 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('enterprise_dashboards', JSON.stringify(dashboards));
   }, [dashboards]);
+
+  // Synchronize dynamic dashboards list from cloud KV store on mount
+  useEffect(() => {
+    async function loadFromCloud() {
+      try {
+        const res = await fetch('https://kvdb.io/mfg_dash_a33c6863_v1/dashboards_published_state');
+        if (res.status === 200) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            setDashboards(data);
+          }
+        }
+      } catch (e) {
+        console.warn("Failed to load dashboards state from cloud sync service:", e);
+      }
+    }
+    loadFromCloud();
+  }, []);
+
+  // Helper to synchronize local updates with the cloud KV store
+  const syncDashboardsToCloud = async (updatedList) => {
+    try {
+      await fetch('https://kvdb.io/mfg_dash_a33c6863_v1/dashboards_published_state', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedList)
+      });
+    } catch (e) {
+      console.warn("Failed to sync updated dashboards to cloud sync service:", e);
+    }
+  };
 
   // Synchronize HTML dark class for Tailwind
   useEffect(() => {
@@ -101,7 +140,7 @@ export default function App() {
 
   // Callback to publish / push a dashboard to live
   const handlePublish = (id, pdfType, fileName, fileSize) => {
-    setDashboards(prev => prev.map(db => {
+    const updated = dashboards.map(db => {
       if (db.id === id) {
         return { 
           ...db, 
@@ -113,18 +152,18 @@ export default function App() {
         };
       }
       return db;
-    }));
+    });
+    setDashboards(updated);
+    syncDashboardsToCloud(updated);
   };
 
   // Callback to unpublish / delete a dashboard
   const handleUnpublish = (id) => {
-    setDashboards(prev => {
-      // For custom dashboards (id > 17), delete entirely
-      if (id > 17) {
-        return prev.filter(db => db.id !== id);
-      }
-      // For default core 17, mark as unpublished draft
-      return prev.map(db => {
+    let updated;
+    if (id > 17) {
+      updated = dashboards.filter(db => db.id !== id);
+    } else {
+      updated = dashboards.map(db => {
         if (db.id === id) {
           return { 
             ...db, 
@@ -137,7 +176,9 @@ export default function App() {
         }
         return db;
       });
-    });
+    }
+    setDashboards(updated);
+    syncDashboardsToCloud(updated);
   };
 
   // Callback to create a new custom dashboard
@@ -154,18 +195,22 @@ export default function App() {
       pushedAt: new Date().toISOString()
     };
 
-    setDashboards(prev => [...prev, newDashboard]);
+    const updated = [...dashboards, newDashboard];
+    setDashboards(updated);
+    syncDashboardsToCloud(updated);
     return newDashboard;
   };
 
   // Callback to rename an existing dashboard
   const handleRenameDashboard = (id, newName) => {
-    setDashboards(prev => prev.map(db => {
+    const updated = dashboards.map(db => {
       if (db.id === id) {
         return { ...db, name: newName };
       }
       return db;
-    }));
+    });
+    setDashboards(updated);
+    syncDashboardsToCloud(updated);
   };
 
   // Callback to restore factory defaults
@@ -174,8 +219,8 @@ export default function App() {
     await clearAllPdfsFromDB();
     // Reset state
     setDashboards(INITIAL_DASHBOARDS);
-    localStorage.removeItem('enterprise_dashboards');
     setSelectedDashboardId(null);
+    syncDashboardsToCloud(INITIAL_DASHBOARDS);
   };
 
   // Callback to log out admin
