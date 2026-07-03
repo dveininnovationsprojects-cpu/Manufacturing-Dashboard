@@ -82,7 +82,13 @@ export default function App() {
   useEffect(() => {
     async function loadFromCloud() {
       try {
-        const res = await fetch('https://extendsclass.com/api/json-storage/bin/bbccfad');
+        const res = await fetch(`https://extendsclass.com/api/json-storage/bin/bbccfad?t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
         if (res.status === 200) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
