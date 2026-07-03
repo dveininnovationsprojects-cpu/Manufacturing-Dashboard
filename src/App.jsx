@@ -82,7 +82,7 @@ export default function App() {
   useEffect(() => {
     async function loadFromCloud() {
       try {
-        const res = await fetch('https://kvdb.io/mfg_dash_a33c6863_v1/dashboards_published_state');
+        const res = await fetch('https://extendsclass.com/api/json-storage/bin/bbccfad');
         if (res.status === 200) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
@@ -99,7 +99,7 @@ export default function App() {
   // Helper to synchronize local updates with the cloud KV store
   const syncDashboardsToCloud = async (updatedList) => {
     try {
-      await fetch('https://kvdb.io/mfg_dash_a33c6863_v1/dashboards_published_state', {
+      await fetch('https://extendsclass.com/api/json-storage/bin/bbccfad', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedList)
