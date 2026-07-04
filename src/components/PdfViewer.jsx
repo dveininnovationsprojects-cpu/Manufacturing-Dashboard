@@ -29,12 +29,7 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType }) {
             setPdfUrl(null);
           }
         } else {
-          // Standard static path fallback
-          if (dashboardId === 2) {
-            setPdfUrl('/dashboard.pdf');
-          } else {
-            setPdfUrl(`/dashboard_${dashboardId}.pdf`);
-          }
+          setPdfUrl(`/dashboard_${dashboardId}.pdf`);
         }
       } catch (err) {
         console.error(err);

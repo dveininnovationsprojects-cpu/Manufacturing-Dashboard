@@ -183,7 +183,7 @@ export default function AdminPanel({
         onPublish(db.id, 'custom', fileName, fileSize);
       } else {
         // Using static file path
-        fileName = db.id === 2 ? 'dashboard.pdf' : `dashboard_${db.id}.pdf`;
+        fileName = `dashboard_${db.id}.pdf`;
         fileSize = 'Static Folder File';
         onPublish(db.id, 'static', fileName, fileSize);
       }
@@ -626,7 +626,7 @@ export default function AdminPanel({
                               className="rounded border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-950 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5"
                             />
                             <span className="text-[10px] font-bold text-zinc-650 dark:text-zinc-400">
-                              Use default static file (<code className="font-mono text-zinc-450">{db.id === 2 ? 'dashboard.pdf' : `dashboard_${db.id}.pdf`}</code>)
+                              Use default static file (<code className="font-mono text-zinc-450">dashboard_{db.id}.pdf</code>)
                             </span>
                           </label>
                         )}

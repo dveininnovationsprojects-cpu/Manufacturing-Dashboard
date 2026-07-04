@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Sun,
   Moon,
   SlidersHorizontal,
@@ -16,7 +16,7 @@ import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 // 17 Standard Dashboards base configuration
 const INITIAL_DASHBOARDS = [
   { id: 1, name: '1 – Executive Command Center', iconName: 'BarChart3', published: true, pdfType: 'static', fileName: 'dashboard_1.pdf', fileSize: 'Static Folder File' },
-  { id: 2, name: '2 – Production Analytics', iconName: 'Activity', published: true, pdfType: 'static', fileName: 'dashboard.pdf', fileSize: 'Static Folder File' },
+  { id: 2, name: '2 – Production Analytics', iconName: 'Activity', published: true, pdfType: 'static', fileName: 'dashboard_2.pdf', fileSize: 'Static Folder File' },
   { id: 3, name: '3 – Machine Performance', iconName: 'Cpu', published: true, pdfType: 'static', fileName: 'dashboard_3.pdf', fileSize: 'Static Folder File' },
   { id: 4, name: '4 – Predictive Maintenance', iconName: 'CheckSquare', published: true, pdfType: 'static', fileName: 'dashboard_4.pdf', fileSize: 'Static Folder File' },
   { id: 5, name: '5 – Quality Intelligence', iconName: 'Clock', published: true, pdfType: 'static', fileName: 'dashboard_5.pdf', fileSize: 'Static Folder File' },
@@ -120,11 +120,11 @@ export default function App() {
   const handlePublish = (id, pdfType, fileName, fileSize) => {
     const updated = dashboards.map(db => {
       if (db.id === id) {
-        return { 
-          ...db, 
-          published: true, 
-          pdfType, 
-          fileName, 
+        return {
+          ...db,
+          published: true,
+          pdfType,
+          fileName,
           fileSize,
           pushedAt: new Date().toISOString()
         };
@@ -143,11 +143,11 @@ export default function App() {
     } else {
       updated = dashboards.map(db => {
         if (db.id === id) {
-          return { 
-            ...db, 
-            published: false, 
-            pdfType: null, 
-            fileName: null, 
+          return {
+            ...db,
+            published: false,
+            pdfType: null,
+            fileName: null,
             fileSize: null,
             pushedAt: null
           };
@@ -210,14 +210,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAF8F5] via-[#FAF6EE] to-[#FFFDF9] dark:from-[#0c0c0f] dark:via-[#09090b] dark:to-[#121214] text-zinc-900 dark:text-zinc-50 transition-colors duration-300 flex">
-      
+
       {/* Main content Pane */}
       <div className="flex-1 flex flex-col min-h-screen">
-        
+
         {/* Dynamic Navigation Header */}
         <header className="border-b border-zinc-200/50 dark:border-zinc-800/40 bg-white/70 dark:bg-[#0c0c0f]/60 backdrop-blur-md sticky top-0 z-30 transition-colors duration-300">
           <div className="w-full px-6 py-3 flex items-center justify-between gap-4">
-            
+
             {/* Left/Middle Section: Dashboard Horizontal Navigation Tabs */}
             {!isAdminMode && publishedDashboards.length > 0 && (
               <nav className="flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none bg-zinc-100/60 dark:bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-200/50 dark:border-zinc-805/30 mr-4">
@@ -227,11 +227,10 @@ export default function App() {
                     <button
                       key={db.id}
                       onClick={() => setSelectedDashboardId(db.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${
-                        isSelected
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                          : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-200'
-                      }`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${isSelected
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
+                        : 'text-zinc-550 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-200'
+                        }`}
                       title={db.name}
                     >
                       {db.name}
@@ -276,11 +275,10 @@ export default function App() {
                     }
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm border cursor-pointer ${
-                  isAdminMode 
-                    ? 'bg-rose-50 dark:bg-rose-955/20 text-rose-600 dark:text-rose-455 border-rose-250/40 hover:bg-rose-100/40' 
-                    : 'bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:text-blue-500'
-                }`}
+                className={`flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm border cursor-pointer ${isAdminMode
+                  ? 'bg-rose-50 dark:bg-rose-955/20 text-rose-600 dark:text-rose-455 border-rose-250/40 hover:bg-rose-100/40'
+                  : 'bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:text-blue-500'
+                  }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>{isAdminMode ? 'Exit Admin View' : 'Admin Console'}</span>
@@ -295,7 +293,7 @@ export default function App() {
         <main className="flex-1 p-6">
           {isAdminMode ? (
             /* Render System Admin Console */
-            <AdminPanel 
+            <AdminPanel
               dashboards={dashboards}
               onPublish={handlePublish}
               onUnpublish={handleUnpublish}
@@ -310,7 +308,7 @@ export default function App() {
               <div className="max-w-xl text-center space-y-6 p-8 glass-panel bg-white/60 dark:bg-[#0c0c0f]/60 relative overflow-hidden">
                 {/* Background design elements */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
-                
+
                 {/* Pulsing Central graphic */}
                 <div className="relative inline-flex items-center justify-center">
                   <div className="absolute w-16 h-16 bg-blue-500/10 dark:bg-blue-500/5 rounded-full animate-ping" />
@@ -359,9 +357,9 @@ export default function App() {
             </div>
           ) : activeDashboard ? (
             /* Render Active Dashboard PDF */
-            <PdfViewer 
-              dashboardId={selectedDashboardId} 
-              dashboardName={activeDashboard.name} 
+            <PdfViewer
+              dashboardId={selectedDashboardId}
+              dashboardName={activeDashboard.name}
               pdfType={activeDashboard.pdfType}
               fileName={activeDashboard.fileName}
               fileSize={activeDashboard.fileSize}
