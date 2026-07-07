@@ -1033,7 +1033,6 @@ export default function Dashboard({ isDarkMode, dashboardId, dashboardName }) {
           </div>
         </div>
       )}
-
     </div>
   );
 }
