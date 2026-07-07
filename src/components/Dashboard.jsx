@@ -1029,7 +1029,6 @@ export default function Dashboard({ isDarkMode, dashboardId, dashboardName }) {
                 Close Audit Logs
               </button>
             </div>
-
           </div>
         </div>
       )}
