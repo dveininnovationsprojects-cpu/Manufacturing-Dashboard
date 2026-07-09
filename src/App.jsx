@@ -330,18 +330,53 @@ export default function App() {
     isOpen: false,
     title: '',
     message: '',
-    onConfirm: null
+    isAlert: false,
+    type: '', // 'clear_logs', 'delete_log', or 'alert'
+    targetId: null
   });
 
-  const triggerConfirm = (title, message, onConfirm) => {
+  const handleConfirmAction = () => {
+    const { type, targetId } = confirmModal;
+    setConfirmModal({ isOpen: false, title: '', message: '', isAlert: false, type: '', targetId: null });
+
+    if (type === 'clear_logs') {
+      try {
+        setLogs([]);
+        if (db) {
+          updateDoc(doc(db, "dashboard_settings", "state"), {
+            logs: [],
+            updatedAt: new Date().toISOString()
+          }).catch(err => console.warn("Failed to clear logs in db:", err));
+        }
+      } catch (e) {
+        console.warn("Failed to clear logs: ", e);
+      }
+    } else if (type === 'delete_log') {
+      try {
+        setLogs(prevLogs => {
+          const updated = prevLogs.filter(l => l.id !== targetId);
+          if (db) {
+            updateDoc(doc(db, "dashboard_settings", "state"), {
+              logs: updated,
+              updatedAt: new Date().toISOString()
+            }).catch(err => console.warn("Failed to delete log entry in db:", err));
+          }
+          return updated;
+        });
+      } catch (e) {
+        console.warn("Failed to delete log entry: ", e);
+      }
+    }
+  };
+
+  const triggerAlert = (title, message) => {
     setConfirmModal({
       isOpen: true,
       title,
       message,
-      onConfirm: () => {
-        setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
-        onConfirm();
-      }
+      isAlert: true,
+      type: 'alert',
+      targetId: null
     });
   };
 
@@ -917,8 +952,6 @@ export default function App() {
     syncDashboardsToCloud(updated, updatedLogs);
     return newDashboard;
   };
-
-
   const handleRenameDashboard = (id, newName) => {
     const dbInfo = dashboards.find(d => d.id === id);
     const oldName = dbInfo ? dbInfo.name : `Dashboard ${id}`;
@@ -930,7 +963,6 @@ export default function App() {
       return db;
     });
     setDashboards(updated);
-
     const newLog = {
       id: Math.random().toString(36).substring(2, 9),
       type: 'rename',
@@ -940,15 +972,12 @@ export default function App() {
     };
     const updatedLogs = [newLog, ...logs];
     setLogs(updatedLogs);
-
     syncDashboardsToCloud(updated, updatedLogs);
   };
-
   const handleResetDefaults = async () => {
     await clearAllPdfsFromDB();
     setDashboards(INITIAL_DASHBOARDS);
     setSelectedDashboardId(null);
-
     const newLog = {
       id: Math.random().toString(36).substring(2, 9),
       type: 'reset',
@@ -958,53 +987,28 @@ export default function App() {
     };
     const updatedLogs = [newLog, ...logs];
     setLogs(updatedLogs);
-
     syncDashboardsToCloud(INITIAL_DASHBOARDS, updatedLogs);
   };
-
   const handleClearAllLogs = () => {
-    triggerConfirm(
-      "Clear All Logs",
-      "Are you sure you want to delete all system logs? This action cannot be undone.",
-      () => {
-        try {
-          setLogs([]);
-          if (db) {
-            updateDoc(doc(db, "dashboard_settings", "state"), {
-              logs: [],
-              updatedAt: new Date().toISOString()
-            }).catch(err => console.warn("Failed to clear logs in db:", err));
-          }
-        } catch (e) {
-          console.warn("Failed to clear logs: ", e);
-        }
-      }
-    );
+    setConfirmModal({
+      isOpen: true,
+      title: "Clear All Logs",
+      message: "Are you sure you want to delete all system logs? This action cannot be undone.",
+      isAlert: false,
+      type: 'clear_logs',
+      targetId: null
+    });
   };
-
   const handleDeleteIndividualLog = (logId) => {
-    triggerConfirm(
-      "Delete Log Entry",
-      "Are you sure you want to delete this log entry?",
-      () => {
-        try {
-          setLogs(prevLogs => {
-            const updated = prevLogs.filter(l => l.id !== logId);
-            if (db) {
-              updateDoc(doc(db, "dashboard_settings", "state"), {
-                logs: updated,
-                updatedAt: new Date().toISOString()
-              }).catch(err => console.warn("Failed to delete log entry in db:", err));
-            }
-            return updated;
-          });
-        } catch (e) {
-          console.warn("Failed to delete log entry: ", e);
-        }
-      }
-    );
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Log Entry",
+      message: "Are you sure you want to delete this log entry?",
+      isAlert: false,
+      type: 'delete_log',
+      targetId: logId
+    });
   };
-
   const handleLogout = () => {
     const newLog = {
       id: Math.random().toString(36).substring(2, 9),
@@ -1087,7 +1091,6 @@ export default function App() {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setLoginError('');
-
     if (username === 'admin' && password === 'admin@123') {
       setIsAdminLoggedIn(true);
       localStorage.setItem('admin_logged_in', 'true');
@@ -1104,7 +1107,6 @@ export default function App() {
       };
       const updatedLogs = [newLog, ...logs];
       setLogs(updatedLogs);
-
       setDoc(doc(db, "dashboard_settings", "state"), {
         list: dashboards,
         comments: comments,
@@ -1506,8 +1508,8 @@ export default function App() {
                     <h3 className="text-sm font-extrabold text-zinc-800 dark:text-zinc-200 uppercase tracking-wider">
                       Company Corporate Logo
                     </h3>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                      Upload your logo (preferably PNG with a transparent background) to show it across headers and login guard pages.
+                    <p className="text-xs text-zinc-550 dark:text-zinc-400">
+                      Upload your logo (preferably PNG with a transparent background, max size 1.00 MB) to show it across headers and login guard pages.
                     </p>
 
                     <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl bg-zinc-50/30 dark:bg-zinc-950/25 space-y-4 w-full">
@@ -1525,34 +1527,46 @@ export default function App() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-3 w-full">
-                        <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-xs font-bold text-zinc-750 dark:text-zinc-250 hover:bg-zinc-55 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm">
-                          <span>Choose Logo Image</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  handleUpdateBranding(customTheme, reader.result);
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="hidden"
-                          />
-                        </label>
+                      <div className="flex flex-col items-center gap-2 w-full">
+                        <div className="flex items-center gap-3 w-full">
+                          <label className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-xs font-bold text-zinc-750 dark:text-zinc-250 hover:bg-zinc-55 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm">
+                            <span>Choose Logo Image</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files[0];
+                                if (file) {
+                                  if (file.size > 1024 * 1024) { // 1MB Limit
+                                    triggerAlert(
+                                      "File Too Large",
+                                      `The selected logo image file size is ${(file.size / 1024 / 1024).toFixed(2)} MB. Please choose a smaller image file under 1.00 MB to maintain database performance and stability.`
+                                    );
+                                    // Clear file input value
+                                    e.target.value = '';
+                                    return;
+                                  }
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    handleUpdateBranding(customTheme, reader.result);
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              className="hidden"
+                            />
+                          </label>
 
-                        {customLogo && (
-                          <button
-                            onClick={() => handleUpdateBranding(customTheme, '')}
-                            className="px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/30 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-all cursor-pointer shadow-sm"
-                          >
-                            Remove Logo
-                          </button>
-                        )}
+                          {customLogo && (
+                            <button
+                              onClick={() => handleUpdateBranding(customTheme, '')}
+                              className="px-4 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900/30 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all cursor-pointer shadow-sm"
+                            >
+                              Remove Logo
+                            </button>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider block text-center">Max limit: 1.00 MB</span>
                       </div>
                     </div>
                   </div>
@@ -1828,6 +1842,58 @@ export default function App() {
             <p>© 2026 Manufacturing Dashboard. Secure administrative data synchronization active.</p>
           </footer>
         </div>
+        
+        {/* Premium Confirm Modal (Admin Views) */}
+        {confirmModal.isOpen && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
+            <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                  confirmModal.isAlert
+                    ? 'bg-amber-50 dark:bg-amber-955/20 border-amber-100 dark:border-amber-900/30 text-amber-500'
+                    : 'bg-rose-50 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/30 text-rose-500'
+                }`}>
+                  <ShieldAlert className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-zinc-905 dark:text-white uppercase tracking-wider">
+                    {confirmModal.title}
+                  </h3>
+                  <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
+                    {confirmModal.isAlert ? 'Validation Warning' : 'Verification Required'}
+                  </p>
+                </div>
+              </div>
+              
+              <p className="text-xs font-semibold text-zinc-650 dark:text-zinc-300 leading-relaxed">
+                {confirmModal.message}
+              </p>
+              
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                {!confirmModal.isAlert && (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                    className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-white dark:bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm"
+                  >
+                    No, Cancel
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleConfirmAction}
+                  className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${
+                    confirmModal.isAlert
+                      ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/10'
+                      : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/10'
+                  }`}
+                >
+                  {confirmModal.isAlert ? 'OK' : 'Yes, Confirm'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -2270,7 +2336,7 @@ export default function App() {
                   ) : (
                     <>
                       <Download className="w-3.5 h-3.5" />
-                      <span>Download Combined PDF ({selectedDownloadIds.length})</span>
+                      <span> Download Combined PDF ({selectedDownloadIds.length})</span>
                     </>
                   )}
                 </button>
@@ -2283,10 +2349,14 @@ export default function App() {
 
       {/* Premium Confirm Modal */}
       {confirmModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm animate-fade-in select-none">
-          <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 scale-up">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
+          <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-955/20 border border-rose-105 dark:border-rose-900/30 flex items-center justify-center text-rose-500 shrink-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+                confirmModal.isAlert
+                  ? 'bg-amber-50 dark:bg-amber-955/20 border-amber-100 dark:border-amber-900/30 text-amber-500'
+                  : 'bg-rose-50 dark:bg-rose-955/20 border-rose-105 dark:border-rose-900/30 text-rose-500'
+              }`}>
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
@@ -2294,7 +2364,7 @@ export default function App() {
                   {confirmModal.title}
                 </h3>
                 <p className="text-[9px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
-                  Verification Required
+                  {confirmModal.isAlert ? 'Validation Warning' : 'Verification Required'}
                 </p>
               </div>
             </div>
@@ -2304,19 +2374,25 @@ export default function App() {
             </p>
             
             <div className="flex items-center justify-end gap-2.5 pt-2">
+              {!confirmModal.isAlert && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                  className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-white dark:bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm"
+                >
+                  No, Cancel
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
-                className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-white dark:bg-transparent text-xs font-bold text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm"
+                onClick={handleConfirmAction}
+                className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${
+                  confirmModal.isAlert
+                    ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/10'
+                    : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/10'
+                }`}
               >
-                No, Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmModal.onConfirm}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all cursor-pointer shadow-md shadow-rose-600/10"
-              >
-                Yes, Confirm
+                {confirmModal.isAlert ? 'OK' : 'Yes, Confirm'}
               </button>
             </div>
           </div>
