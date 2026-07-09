@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, AlertCircle, Loader2 } from 'lucide-react';
 import { getPdfFromDB } from '../utils/db';
 
-export default function PdfViewer({ dashboardId, dashboardName, pdfType }) {
+export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFullscreen }) {
   const [pdfUrl, setPdfUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -55,7 +55,9 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType }) {
   }, [dashboardId, pdfType]);
 
   return (
-    <div className="w-full overflow-hidden flex flex-col h-[calc(100vh-110px)] min-h-[650px] bg-transparent border-none shadow-none">
+    <div className={`w-full overflow-hidden flex flex-col bg-transparent border-none shadow-none ${
+      isFullscreen ? 'h-screen' : 'h-[calc(100vh-110px)] min-h-[650px]'
+    }`}>
       
       {/* PDF Rendering Body */}
       <div className="flex-1 bg-transparent flex items-center justify-center p-0">
