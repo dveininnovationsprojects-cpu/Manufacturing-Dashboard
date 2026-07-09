@@ -7,6 +7,7 @@ import {
   LogOut,
   ArrowLeft,
   SlidersHorizontal,
+  Settings,
   Eye,
   EyeOff,
   Play,
@@ -26,6 +27,8 @@ import {
 } from 'lucide-react';
 import PdfViewer from './components/PdfViewer';
 import AdminPanel from './components/AdminPanel';
+import UserProfile from './components/UserProfile';
+import SystemSettings from './components/SystemSettings';
 import { clearAllPdfsFromDB, getPdfFromDB } from './utils/db';
 import { PDFDocument } from 'pdf-lib';
 import { db } from './firebase';
@@ -420,6 +423,33 @@ export default function App() {
       localStorage.setItem('comment_author', commentAuthor);
     }
   }, [commentAuthor]);
+
+  const [enterpriseTitle, setEnterpriseTitle] = useState(() => {
+    return localStorage.getItem('enterprise_title') || 'Enterprise Analytics';
+  });
+
+  useEffect(() => {
+    const handleTitleChange = () => {
+      setEnterpriseTitle(localStorage.getItem('enterprise_title') || 'Enterprise Analytics');
+    };
+    window.addEventListener('enterpriseTitleChanged', handleTitleChange);
+    return () => window.removeEventListener('enterpriseTitleChanged', handleTitleChange);
+  }, []);
+
+  // Sync theme setting on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const handleRestoreConfig = (restoredList) => {
+    setDashboards(restoredList);
+    syncDashboardsToCloud(restoredList);
+  };
 
   // Synchronize dynamic dashboards list from Firebase Firestore on mount and auto-initialize if blank
   useEffect(() => {
@@ -1091,7 +1121,10 @@ export default function App() {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setLoginError('');
-    if (username === 'admin' && password === 'admin@123') {
+    const savedUsername = localStorage.getItem('admin_username') || 'admin';
+    const savedPassword = localStorage.getItem('admin_auth_password') || 'admin@123';
+
+    if (username === savedUsername && password === savedPassword) {
       setIsAdminLoggedIn(true);
       localStorage.setItem('admin_logged_in', 'true');
       setActivePage('admin');
@@ -1204,7 +1237,8 @@ export default function App() {
     );
   }
 
-  if (activePage === 'admin' || activePage === 'logs' || activePage === 'scheduler' || activePage === 'branding') {
+  // 2. Admin Console View (Sidebar Layout)
+  if (['admin', 'logs', 'scheduler', 'branding', 'settings', 'profile'].includes(activePage)) {
     return (
       <div className={`h-screen overflow-hidden bg-gradient-to-br ${activeTheme.bg} text-zinc-900 flex`}>
         <aside className={`w-64 h-screen border-r flex flex-col justify-between p-5 shrink-0 select-none ${activeTheme.sidebar}`}>
@@ -1213,8 +1247,8 @@ export default function App() {
               {customLogo ? (
                 <img src={customLogo} alt="Logo" className="h-10 max-w-[190px] object-contain rounded-lg" />
               ) : (
-                <h2 className={`text-[11px] font-extrabold tracking-wider uppercase ${activeTheme.text}`}>
-                  Manufacturing Dashboard
+                <h2 className={`text-[11px] font-extrabold tracking-wider uppercase truncate ${activeTheme.text}`} title={enterpriseTitle}>
+                  {enterpriseTitle}
                 </h2>
               )}
             </div>
@@ -1287,6 +1321,28 @@ export default function App() {
                 <Grid className="w-4 h-4" />
                 <span>Dashboards</span>
               </button>
+              <button
+                onClick={() => setActivePage('profile')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activePage === 'profile'
+                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </button>
+              <button
+                onClick={() => setActivePage('settings')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activePage === 'settings'
+                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
             </nav>
           </div>
           <div className={`pt-4 border-t ${activeTheme.sidebarBorder}`}>
@@ -1303,7 +1359,7 @@ export default function App() {
         {/* Right Content Area */}
         <div className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden bg-transparent">
           <main className="flex-1 p-6">
-            {activePage === 'admin' ? (
+            {activePage === 'admin' && (
               <AdminPanel
                 dashboards={dashboards}
                 onPublish={handlePublish}
@@ -1315,7 +1371,9 @@ export default function App() {
                 logs={logs}
                 onViewLogs={() => setActivePage('logs')}
               />
-            ) : activePage === 'scheduler' ? (
+            )}
+
+            {activePage === 'scheduler' && (
               /* Scheduled Publishing / Automations screen */
               <div className="space-y-6 animate-fade-in select-none">
                 <div className="flex items-center justify-between">
@@ -1432,7 +1490,9 @@ export default function App() {
                   </div>
                 </div>
               </div>
-            ) : activePage === 'branding' ? (
+            )}
+
+            {activePage === 'branding' && (
               /* Dedicated Custom Branding Screen */
               <div className="space-y-6 animate-fade-in select-none">
                 <div className="flex items-center justify-between">
@@ -1567,12 +1627,14 @@ export default function App() {
                           )}
                         </div>
                         <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider block text-center">Max limit: 1.00 MB</span>
-                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            ) : (
+            </div>
+          )}
+
+            {activePage === 'logs' && (
               /* Dedicated System Logs Screen */
               <div className="space-y-6 animate-fade-in select-none">
                 <div className="flex items-center justify-between">
@@ -1835,6 +1897,17 @@ export default function App() {
                   )}
                 </div>
               </div>
+
+            )}
+            {activePage === 'profile' && (
+              <UserProfile onLogout={handleLogout} />
+            )}
+            {activePage === 'settings' && (
+              <SystemSettings 
+                dashboards={dashboards} 
+                onRestoreConfig={handleRestoreConfig}
+                onResetDefaults={handleResetDefaults}
+              />
             )}
           </main>
 
