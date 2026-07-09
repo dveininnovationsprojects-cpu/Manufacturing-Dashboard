@@ -6,10 +6,13 @@ import {
   ShieldAlert,
   LogOut,
   ArrowLeft,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Settings
 } from 'lucide-react';
 import PdfViewer from './components/PdfViewer';
 import AdminPanel from './components/AdminPanel';
+import UserProfile from './components/UserProfile';
+import SystemSettings from './components/SystemSettings';
 import { clearAllPdfsFromDB } from './utils/db';
 import { db } from './firebase';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
@@ -47,6 +50,33 @@ export default function App() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loginError, setLoginError] = useState('');
+
+  const [enterpriseTitle, setEnterpriseTitle] = useState(() => {
+    return localStorage.getItem('enterprise_title') || 'Enterprise Analytics';
+  });
+
+  useEffect(() => {
+    const handleTitleChange = () => {
+      setEnterpriseTitle(localStorage.getItem('enterprise_title') || 'Enterprise Analytics');
+    };
+    window.addEventListener('enterpriseTitleChanged', handleTitleChange);
+    return () => window.removeEventListener('enterpriseTitleChanged', handleTitleChange);
+  }, []);
+
+  // Sync theme setting on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const handleRestoreConfig = (restoredList) => {
+    setDashboards(restoredList);
+    syncDashboardsToCloud(restoredList);
+  };
 
   // Synchronize dynamic dashboards list from Firebase Firestore on mount and auto-initialize if blank
   useEffect(() => {
@@ -199,7 +229,10 @@ export default function App() {
     e.preventDefault();
     setLoginError('');
 
-    if (username === 'admin' && password === 'admin@123') {
+    const savedUsername = localStorage.getItem('admin_username') || 'admin';
+    const savedPassword = localStorage.getItem('admin_auth_password') || 'admin@123';
+
+    if (username === savedUsername && password === savedPassword) {
       setIsAdminLoggedIn(true);
       localStorage.setItem('admin_logged_in', 'true');
       setActivePage('admin');
@@ -285,7 +318,7 @@ export default function App() {
   }
 
   // 2. Admin Console View (Sidebar Layout)
-  if (activePage === 'admin') {
+  if (activePage === 'admin' || activePage === 'profile' || activePage === 'settings') {
     return (
       <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0c0c0f] text-zinc-900 dark:text-zinc-50 flex">
         {/* Left Sidebar */}
@@ -293,8 +326,8 @@ export default function App() {
           <div className="space-y-6">
             {/* Logo / Header */}
             <div className="px-2 py-3 border-b border-zinc-800">
-              <h2 className="text-[11px] font-extrabold tracking-wider uppercase text-white">
-                Enterprise Analytics
+              <h2 className="text-[11px] font-extrabold tracking-wider uppercase text-white truncate" title={enterpriseTitle}>
+                {enterpriseTitle}
               </h2>
             </div>
 
@@ -322,6 +355,28 @@ export default function App() {
                 <Grid className="w-4 h-4" />
                 <span>Dashboards</span>
               </button>
+              <button
+                onClick={() => setActivePage('profile')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activePage === 'profile'
+                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <User className="w-4 h-4" />
+                <span>Profile</span>
+              </button>
+              <button
+                onClick={() => setActivePage('settings')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  activePage === 'settings'
+                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </button>
             </nav>
           </div>
 
@@ -340,15 +395,27 @@ export default function App() {
         {/* Right Content Area */}
         <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden bg-gradient-to-br from-[#FAF8F5] via-[#FAF6EE] to-[#FFFDF9] dark:from-[#0c0c0f] dark:via-[#09090b] dark:to-[#121214]">
           <main className="flex-1 p-6">
-            <AdminPanel
-              dashboards={dashboards}
-              onPublish={handlePublish}
-              onUnpublish={handleUnpublish}
-              onCreateDashboard={handleCreateDashboard}
-              onResetDefaults={handleResetDefaults}
-              onRenameDashboard={handleRenameDashboard}
-              onLogout={handleLogout}
-            />
+            {activePage === 'admin' && (
+              <AdminPanel
+                dashboards={dashboards}
+                onPublish={handlePublish}
+                onUnpublish={handleUnpublish}
+                onCreateDashboard={handleCreateDashboard}
+                onResetDefaults={handleResetDefaults}
+                onRenameDashboard={handleRenameDashboard}
+                onLogout={handleLogout}
+              />
+            )}
+            {activePage === 'profile' && (
+              <UserProfile onLogout={handleLogout} />
+            )}
+            {activePage === 'settings' && (
+              <SystemSettings 
+                dashboards={dashboards} 
+                onRestoreConfig={handleRestoreConfig}
+                onResetDefaults={handleResetDefaults}
+              />
+            )}
           </main>
           
           <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-555 shrink-0">
