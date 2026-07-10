@@ -81,14 +81,12 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
   };
 
   const handleWheel = (e) => {
+    // Disable mouse scroll zoom in normal dashboard view to prevent interference with page scrolling
+    if (!isFullscreen) return;
+
     e.preventDefault();
-    
-    // Normalize zoom factor based on scroll wheel/touchpad scroll speed (deltaY magnitude)
-    const scrollDelta = -e.deltaY;
-    const zoomSpeed = 0.35; // Lower = slower, higher = faster zoom
-    const zoomFactor = 1 + (Math.min(Math.abs(scrollDelta), 150) / 1000) * zoomSpeed;
-    
-    const nextScale = scrollDelta > 0 
+    const zoomFactor = 1.08;
+    const nextScale = e.deltaY < 0 
       ? Math.min(scale * zoomFactor, 6) 
       : Math.max(scale / zoomFactor, 0.4);
     
@@ -189,7 +187,7 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
                 height: `${scale * 100}%`,
                 transform: `translate(${position.x}px, ${position.y}px)`,
                 transformOrigin: 'center center',
-                transition: isDragging ? 'none' : 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                transition: isDragging ? 'none' : 'transform 0.15s ease-out',
               }}
               className="absolute flex items-center justify-center shrink-0 pointer-events-none"
             >
