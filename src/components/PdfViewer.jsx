@@ -81,9 +81,7 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
   };
 
   const handleWheel = (e) => {
-    // Disable mouse scroll zoom in normal dashboard view to prevent interference with page scrolling
-    if (!isFullscreen) return;
-
+    if (!isFullscreen) return; // Allow normal page scroll, do not intercept wheel in dashboard view
     e.preventDefault();
     const zoomFactor = 1.08;
     const nextScale = e.deltaY < 0 
@@ -109,6 +107,7 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
 
   const handleMouseDown = (e) => {
     if (e.button !== 0) return; // Only drag with left click
+    if (!isFullscreen && scale <= 1) return; // Disable dragging in normal view if not zoomed in
     setIsDragging(true);
     setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
   };
@@ -126,6 +125,7 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
   };
 
   const handleTouchStart = (e) => {
+    if (!isFullscreen && scale <= 1) return; // Disable dragging in normal view if not zoomed in
     if (e.touches.length === 1) {
       setIsDragging(true);
       const touch = e.touches[0];
@@ -183,19 +183,17 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
             {/* The transform container */}
             <div 
               style={{
+                width: `${scale * 100}%`,
+                height: `${scale * 100}%`,
                 transform: `translate(${position.x}px, ${position.y}px)`,
+                transformOrigin: 'center center',
                 transition: isDragging ? 'none' : 'transform 0.15s ease-out',
               }}
-              className="w-full h-full absolute flex items-center justify-center shrink-0 pointer-events-none"
+              className="absolute flex items-center justify-center shrink-0 pointer-events-none"
             >
               <iframe 
                 src={`${pdfUrl}#toolbar=0&navpanes=0&view=Fit&zoom=page-fit`} 
-                style={{
-                  zoom: scale,
-                  width: '100%',
-                  height: '100%',
-                }}
-                className="border-none bg-transparent pointer-events-none"
+                className="w-full h-full border-none bg-transparent pointer-events-none"
                 title={`${dashboardName} Report Viewer`}
                 key={`${dashboardId}-${pdfUrl}`} // Force reload on dashboard swap
               />

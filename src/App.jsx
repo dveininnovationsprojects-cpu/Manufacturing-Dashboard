@@ -24,7 +24,9 @@ import {
   History,
   Calendar,
   Palette
-} from 'lucide-react';
+}
+
+from 'lucide-react';
 import PdfViewer from './components/PdfViewer';
 import AdminPanel from './components/AdminPanel';
 import UserProfile from './components/UserProfile';
@@ -743,7 +745,6 @@ export default function App() {
       setShowControls(false);
     }, 2000);
   };
-
   
   const handleMergeAndDownload = async () => {
     if (selectedDownloadIds.length === 0) return;
@@ -2195,7 +2196,6 @@ export default function App() {
                       ))
                     )}
                   </div>
-
                   {/* Comment Input Box */}
                   <form onSubmit={handleAddCommentSubmit} className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] space-y-2 shrink-0">
                     <div className="flex gap-2">
