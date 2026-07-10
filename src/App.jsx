@@ -338,6 +338,30 @@ export default function App() {
     targetId: null
   });
 
+  const executeLogout = () => {
+    const newLog = {
+      id: Math.random().toString(36).substring(2, 9),
+      type: 'logout',
+      detail: 'Admin logged out',
+      user: 'Admin',
+      timestamp: new Date().toISOString()
+    };
+    const updatedLogs = [newLog, ...logs];
+    setLogs(updatedLogs);
+
+    setIsAdminLoggedIn(false);
+    localStorage.removeItem('admin_logged_in');
+    localStorage.removeItem('active_page');
+    setActivePage('admin');
+
+    setDoc(doc(db, "dashboard_settings", "state"), {
+      list: dashboards,
+      comments: comments,
+      logs: updatedLogs,
+      updatedAt: new Date().toISOString()
+    }).catch(err => console.warn(err));
+  };
+
   const handleConfirmAction = () => {
     const { type, targetId } = confirmModal;
     setConfirmModal({ isOpen: false, title: '', message: '', isAlert: false, type: '', targetId: null });
@@ -369,6 +393,8 @@ export default function App() {
       } catch (e) {
         console.warn("Failed to delete log entry: ", e);
       }
+    } else if (type === 'logout') {
+      executeLogout();
     }
   };
 
@@ -1040,27 +1066,14 @@ export default function App() {
     });
   };
   const handleLogout = () => {
-    const newLog = {
-      id: Math.random().toString(36).substring(2, 9),
+    setConfirmModal({
+      isOpen: true,
+      title: "Confirm Logout",
+      message: "Are you sure you want to log out of the administration console?",
+      isAlert: false,
       type: 'logout',
-      detail: 'Admin logged out',
-      user: 'Admin',
-      timestamp: new Date().toISOString()
-    };
-    const updatedLogs = [newLog, ...logs];
-    setLogs(updatedLogs);
-
-    setIsAdminLoggedIn(false);
-    localStorage.removeItem('admin_logged_in');
-    localStorage.removeItem('active_page');
-    setActivePage('admin');
-
-    setDoc(doc(db, "dashboard_settings", "state"), {
-      list: dashboards,
-      comments: comments,
-      logs: updatedLogs,
-      updatedAt: new Date().toISOString()
-    }).catch(err => console.warn(err));
+      targetId: null
+    });
   };
 
   const handleUpdateSchedule = (id, newSchedule) => {
@@ -1299,7 +1312,7 @@ export default function App() {
                   }`}
               >
                 <Palette className="w-4 h-4" />
-                <span>Custom Branding</span>
+                <span>Custom Theme</span>
               </button>
               <button
                 onClick={() => setActivePage('logs')}
@@ -1323,16 +1336,15 @@ export default function App() {
               </button>
               <button
                 onClick={() => setActivePage('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activePage === 'profile'
-                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${activePage === 'profile'
+                  ? activeTheme.sidebarActive
+                  : activeTheme.sidebarInactive
+                  }`}
               >
                 <User className="w-4 h-4" />
                 <span>Profile</span>
               </button>
-              <button
+              {/* <button
                 onClick={() => setActivePage('settings')}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   activePage === 'settings'
@@ -1342,7 +1354,7 @@ export default function App() {
               >
                 <Settings className="w-4 h-4" />
                 <span>Settings</span>
-              </button>
+              </button> */}
             </nav>
           </div>
           <div className={`pt-4 border-t ${activeTheme.sidebarBorder}`}>
