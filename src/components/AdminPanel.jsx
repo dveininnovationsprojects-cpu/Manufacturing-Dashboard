@@ -327,15 +327,6 @@ export default function AdminPanel({
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Factory Reset</span>
           </button>
-
-          <button 
-            onClick={onLogout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-all cursor-pointer"
-            title="Log out from Admin Console"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
-          </button>
           
           <button 
             onClick={() => setShowCreateForm(!showCreateForm)}

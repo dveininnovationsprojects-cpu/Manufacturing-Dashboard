@@ -675,6 +675,9 @@ export default function App() {
           const prevIndex = (currentIndex - 1 + publishedDashboards.length) % publishedDashboards.length;
           return publishedDashboards[prevIndex].id;
         });
+      } else if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        setPresentationPlaying(prev => !prev);
       }
     };
 
@@ -1990,7 +1993,11 @@ export default function App() {
             <div className="flex items-center gap-2 flex-wrap shrink-0">
               <button
                 onClick={() => setActivePage('admin')}
-                className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-555 cursor-pointer shrink-0 shadow-sm"
+                className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm ${
+                  activeTheme 
+                    ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-555'
+                }`}
                 title="Back to Admin Console"
               >
                 <ArrowLeft className="w-4.5 h-4.5" />
@@ -2002,7 +2009,11 @@ export default function App() {
                     setIsPresentationMode(true);
                     setPresentationPlaying(true);
                   }}
-                  className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 hover:text-blue-550 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5"
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${
+                    activeTheme 
+                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
+                  }`}
                   title="Enter TV Presentation Slideshow"
                 >
                   <Tv className="w-4.5 h-4.5 text-blue-500 animate-pulse" />
@@ -2017,7 +2028,11 @@ export default function App() {
                     setDownloadError('');
                     setIsDownloadModalOpen(true);
                   }}
-                  className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 hover:text-blue-550 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5"
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${
+                    activeTheme 
+                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                      : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
+                  }`}
                   title="Download Combined PDF Reports"
                 >
                   <Download className="w-4.5 h-4.5 text-emerald-600" />
@@ -2028,31 +2043,38 @@ export default function App() {
               {publishedDashboards.length > 0 && (
                 <button
                   onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-                  className={`p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 transition-all ${
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 transition-all ${
                     isCommentsOpen 
-                      ? 'text-blue-550 bg-blue-50 dark:bg-blue-955/20 border-blue-200 dark:border-blue-800' 
-                      : 'text-zinc-750 hover:text-blue-550 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900'
+                      ? activeTheme.sidebarActive
+                      : activeTheme 
+                        ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                        : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
                   }`}
                   title="Toggle Comments Panel"
                 >
-                  <MessageSquare className="w-4.5 h-4.5 text-blue-555" />
+                  <MessageSquare className="w-4.5 h-4.5" />
                   <span className="text-[10px] font-extrabold uppercase tracking-wider hidden sm:inline">Comments</span>
                 </button>
               )}
             </div>
 
             {publishedDashboards.length > 0 && (
-              <nav className="flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none bg-zinc-100/60 dark:bg-zinc-900/40 p-1.5 rounded-2xl border border-zinc-200/50 dark:border-zinc-805/30 ml-2">
+              <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ml-2 ${
+                activeTheme 
+                  ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10` 
+                  : 'bg-zinc-100/60 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-805/30'
+              }`}>
                 {publishedDashboards.map((db) => {
                   const isSelected = db.id === selectedDashboardId;
                   return (
                     <button
                       key={db.id}
                       onClick={() => setSelectedDashboardId(db.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${isSelected
-                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-955 shadow-sm'
-                        : 'text-zinc-555 dark:text-zinc-450 hover:text-zinc-900 dark:hover:text-zinc-200'
-                        }`}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${
+                        isSelected
+                          ? activeTheme ? activeTheme.sidebarActive : 'bg-zinc-900 text-white'
+                          : activeTheme ? activeTheme.sidebarInactive : 'text-zinc-555 dark:text-zinc-450 hover:text-zinc-900'
+                      }`}
                       title={db.name}
                     >
                       {db.name}
@@ -2102,6 +2124,7 @@ export default function App() {
                       fileName={activeDashboard.fileName}
                       fileSize={activeDashboard.fileSize}
                       isFullscreen={isPresentationMode}
+                      activeTheme={activeTheme}
                     />
                   </div>
                 ) : null}
