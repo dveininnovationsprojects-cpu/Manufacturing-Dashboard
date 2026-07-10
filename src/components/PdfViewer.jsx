@@ -180,11 +180,13 @@ export default function PdfViewer({ dashboardId, dashboardName, pdfType, isFulls
             {/* The transform container */}
             <div 
               style={{
-                transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
+                width: `${scale * 100}%`,
+                height: `${scale * 100}%`,
+                transform: `translate(${position.x}px, ${position.y}px)`,
                 transformOrigin: 'center center',
                 transition: isDragging ? 'none' : 'transform 0.15s ease-out',
               }}
-              className="w-full h-full pointer-events-none"
+              className="absolute flex items-center justify-center shrink-0 pointer-events-none"
             >
               <iframe 
                 src={`${pdfUrl}#toolbar=0&navpanes=0&view=Fit&zoom=page-fit`} 
