@@ -362,7 +362,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#FAF8F5] dark:bg-[#0c0c0f] text-zinc-900 dark:text-zinc-550 flex">
         {/* Left Sidebar */}
-        <aside className="w-64 bg-zinc-950 text-zinc-300 border-r border-zinc-800 flex flex-col justify-between p-5 shrink-0 select-none">
+        <aside className="w-64 h-screen sticky top-0 bg-zinc-950 text-zinc-300 border-r border-zinc-800 flex flex-col justify-between p-5 shrink-0 select-none">
           <div className="space-y-6">
             {/* Logo / Header */}
             <div className="px-2 py-3 border-b border-zinc-800">

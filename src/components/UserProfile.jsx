@@ -8,7 +8,8 @@ import {
   Edit2, 
   Mail, 
   Phone, 
-  X 
+  X,
+  Camera
 } from 'lucide-react';
 
 const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
@@ -158,12 +159,24 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                   className="w-full h-full object-cover transition-all duration-300"
                 />
                 {isEditing && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-[10px] font-black uppercase text-white">Change</span>
+                  <div className="absolute inset-0 bg-black/45 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-1">
+                    <Camera className="w-4 h-4 text-white" />
+                    <span className="text-[9px] font-black uppercase text-white tracking-wider">Change</span>
                   </div>
                 )}
               </div>
-              <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-zinc-950" />
+              {isEditing ? (
+                <button
+                  type="button"
+                  onClick={triggerFileSelect}
+                  className="absolute bottom-0 right-0 p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-full border border-white shadow-lg transition-all cursor-pointer hover:scale-110 flex items-center justify-center"
+                  title="Change profile picture"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <div className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-zinc-950" title="Active" />
+              )}
               <input 
                 type="file" 
                 ref={fileInputRef}
