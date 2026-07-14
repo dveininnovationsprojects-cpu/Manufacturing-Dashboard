@@ -7,7 +7,6 @@ import {
   LogOut,
   ArrowLeft,
   SlidersHorizontal,
-  Settings,
   Eye,
   EyeOff,
   Play,
@@ -24,17 +23,16 @@ import {
   History,
   Calendar,
   Palette
-}
-
-from 'lucide-react';
+} from 'lucide-react';
 import PdfViewer from './components/PdfViewer';
 import AdminPanel from './components/AdminPanel';
 import UserProfile from './components/UserProfile';
-import SystemSettings from './components/SystemSettings';
 import { clearAllPdfsFromDB, getPdfFromDB } from './utils/db';
 import { PDFDocument } from 'pdf-lib';
 import { db } from './firebase';
 import { doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+
+const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2050/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
 
 // 17 Standard Dashboards base configuration
 const INITIAL_DASHBOARDS = [
@@ -281,6 +279,36 @@ export default function App() {
   const [activePage, setActivePage] = useState(() => {
     return localStorage.getItem('active_page') || 'admin';
   });
+  const [profile, setProfile] = useState(() => {
+    const saved = localStorage.getItem('admin_profile');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Failed to parse saved profile:", e);
+      }
+    }
+    return {
+      fullName: 'Sara Chen',
+      email: 'sara@dvein.com',
+      status: 'Active',
+      joinedDate: 'March 10, 2023',
+      about: 'HR executives and Financial operations',
+      specializations: ['HR', 'Management', 'Finance', 'operation'],
+      phone: '1234567890',
+      linkedin: 'sara-chen',
+      github: 'sarachen',
+      avatar: '',
+      coursesTaught: 1,
+      totalStudents: 32,
+      experience: '4 yrs',
+      skillsCount: 4
+    };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('admin_profile', JSON.stringify(profile));
+  }, [profile]);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     return localStorage.getItem('admin_logged_in') === 'true';
   });
@@ -474,10 +502,7 @@ export default function App() {
     }
   }, []);
 
-  const handleRestoreConfig = (restoredList) => {
-    setDashboards(restoredList);
-    syncDashboardsToCloud(restoredList);
-  };
+
 
   // Synchronize dynamic dashboards list from Firebase Firestore on mount and auto-initialize if blank
   useEffect(() => {
@@ -1179,13 +1204,21 @@ export default function App() {
                 <div className="flex justify-center mb-3">
                   <img src={customLogo} alt="Logo" className="h-16 max-w-[260px] object-contain rounded-xl" />
                 </div>
+              ) : profile.avatar ? (
+                <div className="flex justify-center mb-3">
+                  <img 
+                    src={profile.avatar} 
+                    alt="Admin Avatar" 
+                    className="w-16 h-16 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-800/80 shadow-md"
+                  />
+                </div>
               ) : (
                 <div className="inline-flex p-3 bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/10 mb-2">
                   <Lock className="w-5 h-5" />
                 </div>
               )}
               <h3 className="text-base font-extrabold text-zinc-900 dark:text-white">
-                Manufacturing Dashboard Login
+                {profile.avatar ? `Welcome back, ${profile.fullName}` : 'Manufacturing Dashboard Login'}
               </h3>
               <p className="text-[10px] text-zinc-400 dark:text-zinc-550 font-bold uppercase tracking-wider">
                 Enter credentials to access System Console
@@ -1255,7 +1288,7 @@ export default function App() {
   }
 
   // 2. Admin Console View (Sidebar Layout)
-  if (['admin', 'logs', 'scheduler', 'branding', 'settings', 'profile'].includes(activePage)) {
+  if (['admin', 'logs', 'scheduler', 'branding', 'profile'].includes(activePage)) {
     return (
       <div className={`h-screen overflow-hidden bg-gradient-to-br ${activeTheme.bg} text-zinc-900 flex`}>
         <aside className={`w-64 h-screen border-r flex flex-col justify-between p-5 shrink-0 select-none ${activeTheme.sidebar}`}>
@@ -1348,26 +1381,29 @@ export default function App() {
                 <User className="w-4 h-4" />
                 <span>Profile</span>
               </button>
-              {/* <button
-                onClick={() => setActivePage('settings')}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                  activePage === 'settings'
-                    ? 'bg-white text-zinc-950 shadow-md font-extrabold'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                <span>Settings</span>
-              </button> */}
+
             </nav>
           </div>
-          <div className={`pt-4 border-t ${activeTheme.sidebarBorder}`}>
+
+          {/* Bottom Profile Card & Logout */}
+          <div className={`pt-4 border-t ${activeTheme.sidebarBorder} flex items-center justify-between gap-2 overflow-hidden`}>
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <img
+                src={profile.avatar || DEFAULT_AVATAR}
+                alt="Profile"
+                className={`w-9 h-9 rounded-full object-cover border shrink-0 ${activeTheme.sidebarBorder}`}
+              />
+              <div className="overflow-hidden">
+                <p className={`text-[11px] font-bold truncate ${activeTheme.text}`}>{profile.fullName}</p>
+                <p className={`text-[9px] font-semibold truncate ${activeTheme.subText}`}>Admin</p>
+              </div>
+            </div>
             <button
               onClick={handleLogout}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all ${activeTheme.logoutButton} cursor-pointer`}
+              title="Logout"
+              className={`p-2 rounded-xl transition-all cursor-pointer shrink-0 ${activeTheme.logoutButton}`}
             >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              <LogOut className="w-4.5 h-4.5" />
             </button>
           </div>
         </aside>
@@ -1916,15 +1952,13 @@ export default function App() {
 
             )}
             {activePage === 'profile' && (
-              <UserProfile onLogout={handleLogout} />
-            )}
-            {activePage === 'settings' && (
-              <SystemSettings 
-                dashboards={dashboards} 
-                onRestoreConfig={handleRestoreConfig}
-                onResetDefaults={handleResetDefaults}
+              <UserProfile 
+                profile={profile} 
+                onUpdateProfile={setProfile} 
+                onLogout={handleLogout} 
               />
             )}
+
           </main>
 
           <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-555 shrink-0">
