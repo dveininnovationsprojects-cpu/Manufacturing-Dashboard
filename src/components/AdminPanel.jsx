@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Upload, 
   Trash2, 
@@ -11,7 +11,7 @@ import {
   Check, 
   X,
   FileText,
-  SlidersHorizontal,
+  ChevronLeft,
   ChevronRight,
   Activity,
   BarChart3,
@@ -29,7 +29,6 @@ import {
   AlertTriangle,
   Radio,
   BrainCircuit,
-  Settings,
   LogOut
 } from 'lucide-react';
 import { savePdfToDB, deletePdfFromDB } from '../utils/db';
@@ -202,18 +201,15 @@ export default function AdminPanel({
     }
   };
 
-  // Handle unpublishing/deleting a dashboard
   const handleUnpublish = async (db) => {
     try {
-      // 1. Delete PDF blob from IndexedDB if it was custom
+
       if (db.pdfType === 'custom') {
         await deletePdfFromDB(db.id);
       }
 
-      // 2. Trigger parent unpublish (also deletes custom dashboard if id > 17)
       onUnpublish(db.id);
-      
-      // Clear pending uploads for this id
+
       setPendingUploads(prev => {
         const updated = { ...prev };
         delete updated[db.id];
@@ -241,11 +237,7 @@ export default function AdminPanel({
     }
   };
 
-  // Stats calculation
-  const totalCount = dashboards.length;
-  const liveCount = dashboards.filter(d => d.published).length;
-  const draftCount = totalCount - liveCount;
-  const customCount = dashboards.filter(d => d.published && d.pdfType === 'custom').length;
+
 
   // Filtered list
   const filteredDashboards = dashboards.filter(db => {
@@ -255,6 +247,19 @@ export default function AdminPanel({
                           statusFilter === 'live' ? db.published : !db.published;
     return matchesSearch && matchesStatus;
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Reset to page 1 when search or status filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filteredDashboards.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedDashboards = filteredDashboards.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-6">
@@ -270,50 +275,6 @@ export default function AdminPanel({
           <span className="text-xs font-bold">{actionFeedback.message}</span>
         </div>
       )}
-
-      {/* 2. Admin Quick Stats Widget */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-blue-500 bg-white/60 dark:bg-[#0c0c0f]/60">
-          <div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Total Dashboards</span>
-            <span className="text-2xl font-extrabold text-zinc-900 dark:text-white mt-1 block">{totalCount}</span>
-          </div>
-          <div className="bg-blue-50 dark:bg-blue-950/30 p-2.5 rounded-xl text-blue-600 dark:text-blue-400">
-            <SlidersHorizontal className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-emerald-500 bg-white/60 dark:bg-[#0c0c0f]/60">
-          <div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Live on User View</span>
-            <span className="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 block">{liveCount}</span>
-          </div>
-          <div className="bg-emerald-50 dark:bg-emerald-950/30 p-2.5 rounded-xl text-emerald-600 dark:text-emerald-400">
-            <CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-zinc-400 bg-white/60 dark:bg-[#0c0c0f]/60">
-          <div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Draft / Hidden</span>
-            <span className="text-2xl font-extrabold text-zinc-550 dark:text-zinc-400 mt-1 block">{draftCount}</span>
-          </div>
-          <div className="bg-zinc-100 dark:bg-zinc-900 p-2.5 rounded-xl text-zinc-500 dark:text-zinc-400">
-            <Settings className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="glass-panel p-5 flex items-center justify-between border-l-4 border-amber-500 bg-white/60 dark:bg-[#0c0c0f]/60">
-          <div>
-            <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Custom PDF Uploads</span>
-            <span className="text-2xl font-extrabold text-amber-655 dark:text-amber-400 mt-1 block">{customCount} {customCount === 1 ? 'File' : 'Files'}</span>
-          </div>
-          <div className="bg-amber-50 dark:bg-amber-955/30 p-2.5 rounded-xl text-amber-600 dark:text-amber-400">
-            <Upload className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
-
       {/* 3. Action Toolbar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 p-4 rounded-xl shadow-sm">
         
@@ -351,6 +312,8 @@ export default function AdminPanel({
 
         {/* Action buttons */}
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+         
+
           <button 
             onClick={() => {
               if (confirm('Are you sure you want to reset all dashboards to factory default unpublished state? This will delete all custom dashboards and uploaded files.')) {
@@ -358,20 +321,11 @@ export default function AdminPanel({
                 showFeedback('success', 'Reset completed. All dashboards set back to unpublished draft.');
               }
             }}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-455 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-zinc-200 dark:border-zinc-800 text-rose-600 dark:text-rose-455 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-all cursor-pointer"
             title="Reset all settings to initial defaults"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Factory Reset</span>
-          </button>
-
-          <button 
-            onClick={onLogout}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold border border-rose-200 dark:border-rose-900/30 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-955/20 transition-all cursor-pointer"
-            title="Log out from Admin Console"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Logout</span>
           </button>
           
           <button 
@@ -520,12 +474,12 @@ export default function AdminPanel({
 
         {/* Table Content */}
         {filteredDashboards.length === 0 ? (
-          <div className="p-8 text-center text-zinc-500 dark:text-zinc-450 text-xs font-bold">
+          <div className="p-8 text-center text-zinc-500 dark:text-zinc-455 text-xs font-bold">
             No dashboards match your criteria. Try adjusting the search query or status filter.
           </div>
         ) : (
           <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-            {filteredDashboards.map((db) => {
+            {paginatedDashboards.map((db) => {
               const IconComponent = ICON_MAP[db.iconName] || ICON_MAP.BarChart3;
               const isEditing = editingId === db.id;
               const isLive = db.published;
@@ -686,6 +640,93 @@ export default function AdminPanel({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4.5 bg-zinc-50/50 dark:bg-zinc-950/20 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="text-xs text-zinc-500 dark:text-zinc-450 font-semibold">
+              Showing <span className="font-extrabold text-zinc-800 dark:text-zinc-200">{startIndex + 1}</span> to{' '}
+              <span className="font-extrabold text-zinc-800 dark:text-zinc-200">
+                {Math.min(endIndex, filteredDashboards.length)}
+              </span>{' '}
+              of <span className="font-extrabold text-zinc-800 dark:text-zinc-200">{filteredDashboards.length}</span> dashboards
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${
+                  currentPage === 1
+                    ? 'border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                }`}
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+
+              {(() => {
+                const getPaginationRange = (curr, total) => {
+                  const range = [];
+                  const max = 5;
+                  if (total <= max) {
+                    for (let i = 1; i <= total; i++) range.push(i);
+                  } else {
+                    if (curr <= 3) {
+                      range.push(1, 2, 3, 4, '...', total);
+                    } else if (curr >= total - 2) {
+                      range.push(1, '...', total - 3, total - 2, total - 1, total);
+                    } else {
+                      range.push(1, '...', curr - 1, curr, curr + 1, '...', total);
+                    }
+                  }
+                  return range;
+                };
+
+                return getPaginationRange(currentPage, totalPages).map((page, index) => {
+                  if (page === '...') {
+                    return (
+                      <span
+                        key={`ellipsis-${index}`}
+                        className="px-2.5 py-1.5 text-xs text-zinc-450 dark:text-zinc-500 font-bold select-none"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  return (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        currentPage === page
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-955 shadow-sm font-extrabold'
+                          : 'border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-655 dark:text-zinc-450 hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                });
+              })()}
+
+              <button
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${
+                  currentPage === totalPages
+                    ? 'border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
+                    : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] hover:bg-zinc-50 dark:hover:bg-zinc-900'
+                }`}
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         )}
 

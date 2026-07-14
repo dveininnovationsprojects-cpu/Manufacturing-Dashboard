@@ -342,7 +342,6 @@ export default function EmbeddedDashboard() {
           </div>
         </div>
       )}
-
       {activeSubTab === 'frontend' && (
         <div className="glass-panel p-5 space-y-4 max-w-4xl mx-auto">
           <div className="flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 pb-2">
