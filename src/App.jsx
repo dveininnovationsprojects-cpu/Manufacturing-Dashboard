@@ -679,7 +679,7 @@ export default function App() {
     setIsPresentationMode(false);
     setPresentationPlaying(false);
     if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
+      document.exitFullscreen().catch(() => { });
     }
   };
 
@@ -717,7 +717,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
@@ -770,7 +770,7 @@ export default function App() {
       setShowControls(false);
     }, 2000);
   };
-  
+
   const handleMergeAndDownload = async () => {
     if (selectedDownloadIds.length === 0) return;
     setIsDownloading(true);
@@ -1206,9 +1206,9 @@ export default function App() {
                 </div>
               ) : profile.avatar ? (
                 <div className="flex justify-center mb-3">
-                  <img 
-                    src={profile.avatar} 
-                    alt="Admin Avatar" 
+                  <img
+                    src={profile.avatar}
+                    alt="Admin Avatar"
                     className="w-16 h-16 rounded-full object-cover border-2 border-zinc-200 dark:border-zinc-800/80 shadow-md"
                   />
                 </div>
@@ -1455,7 +1455,7 @@ export default function App() {
                   <div className="flex-1 overflow-y-auto divide-y divide-zinc-150 dark:divide-zinc-850">
                     {dashboards.map((dbItem) => {
                       const itemSchedule = dbItem.schedule || { publishTime: '08:00', unpublishTime: '18:00', isEnabled: false };
-                      
+
                       return (
                         <div key={dbItem.id} className="grid grid-cols-12 gap-4 px-6 py-4 text-xs font-semibold text-zinc-750 dark:text-zinc-300 hover:bg-zinc-55/40 dark:hover:bg-zinc-955/40 items-center transition-all">
                           {/* Name & Icon */}
@@ -1474,11 +1474,10 @@ export default function App() {
                           </div>
                           {/* Status */}
                           <div className="col-span-2">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider inline-block border ${
-                              dbItem.published 
-                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider inline-block border ${dbItem.published
+                                ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                 : 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-                            }`}>
+                              }`}>
                               {dbItem.published ? 'Live' : 'Draft'}
                             </span>
                           </div>
@@ -1492,9 +1491,8 @@ export default function App() {
                                 ...itemSchedule,
                                 publishTime: e.target.value
                               })}
-                              className={`bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-all ${
-                                !itemSchedule.isEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                              }`}
+                              className={`bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-all ${!itemSchedule.isEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                }`}
                             />
                           </div>
 
@@ -1508,9 +1506,8 @@ export default function App() {
                                 ...itemSchedule,
                                 unpublishTime: e.target.value
                               })}
-                              className={`bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-all ${
-                                !itemSchedule.isEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                              }`}
+                              className={`bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 focus:outline-none focus:border-blue-500 transition-all ${!itemSchedule.isEnabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                }`}
                             />
                           </div>
 
@@ -1522,14 +1519,12 @@ export default function App() {
                                 ...itemSchedule,
                                 isEnabled: !itemSchedule.isEnabled
                               })}
-                              className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer outline-none border border-transparent ${
-                                itemSchedule.isEnabled ? 'bg-blue-600' : 'bg-zinc-300 dark:bg-zinc-800'
-                              }`}
+                              className={`w-10 h-6 rounded-full transition-colors relative cursor-pointer outline-none border border-transparent ${itemSchedule.isEnabled ? 'bg-blue-600' : 'bg-zinc-300 dark:bg-zinc-800'
+                                }`}
                             >
                               <span
-                                className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${
-                                  itemSchedule.isEnabled ? 'left-5' : 'left-0.5'
-                                }`}
+                                className={`w-4 h-4 bg-white rounded-full absolute top-0.5 transition-all shadow-sm ${itemSchedule.isEnabled ? 'left-5' : 'left-0.5'
+                                  }`}
                               />
                             </button>
                             <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider">
@@ -1577,27 +1572,26 @@ export default function App() {
                           <button
                             key={themeKey}
                             onClick={() => handleUpdateBranding(themeKey, customLogo)}
-                            className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                              isSelected
+                            className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${isSelected
                                 ? 'border-zinc-950 bg-zinc-50 dark:bg-zinc-900/40 ring-1 ring-zinc-950'
                                 : 'border-zinc-200 bg-transparent hover:bg-zinc-50/50'
-                            }`}
+                              }`}
                           >
                             <div>
                               <span className="text-xs font-bold text-zinc-850 block">{theme.name}</span>
                               <span className="text-[10px] text-zinc-400 block mt-0.5">
                                 {themeKey === 'classic-cream' ? 'Classic warm sand sandcastles' :
-                                 themeKey === 'soft-lavender' ? 'Subtle lavender-indigo pastels' :
-                                 themeKey === 'sage-garden' ? 'Organic sage-green herbal tones' :
-                                 themeKey === 'slate-grey' ? 'Sleek minimalist steel-slate look' :
-                                 themeKey === 'peach-blossom' ? 'Soft golden peach-apricot sunset' :
-                                 themeKey === 'powder-blue' ? 'Refreshing powder sky-blue layout' :
-                                 themeKey === 'rose-petal' ? 'Dusty rose-pink blush highlights' :
-                                 themeKey === 'mint-green' ? 'Clean herbal mint-teal accents' :
-                                 themeKey === 'warm-sand' ? 'Soft sand dune beige layout' :
-                                 themeKey === 'sakura-white' ? 'Ultra-clean cherry blossom white' :
-                                 themeKey === 'silver-lilac' ? 'Muted silver lilac grey tones' :
-                                 'Polished metallic steel layout'}
+                                  themeKey === 'soft-lavender' ? 'Subtle lavender-indigo pastels' :
+                                    themeKey === 'sage-garden' ? 'Organic sage-green herbal tones' :
+                                      themeKey === 'slate-grey' ? 'Sleek minimalist steel-slate look' :
+                                        themeKey === 'peach-blossom' ? 'Soft golden peach-apricot sunset' :
+                                          themeKey === 'powder-blue' ? 'Refreshing powder sky-blue layout' :
+                                            themeKey === 'rose-petal' ? 'Dusty rose-pink blush highlights' :
+                                              themeKey === 'mint-green' ? 'Clean herbal mint-teal accents' :
+                                                themeKey === 'warm-sand' ? 'Soft sand dune beige layout' :
+                                                  themeKey === 'sakura-white' ? 'Ultra-clean cherry blossom white' :
+                                                    themeKey === 'silver-lilac' ? 'Muted silver lilac grey tones' :
+                                                      'Polished metallic steel layout'}
                               </span>
                             </div>
                             <div className="flex gap-1.5 shrink-0">
@@ -1679,12 +1673,12 @@ export default function App() {
                           )}
                         </div>
                         <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-bold uppercase tracking-wider block text-center">Max limit: 1.00 MB</span>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
             {activePage === 'logs' && (
               /* Dedicated System Logs Screen */
@@ -1787,27 +1781,26 @@ export default function App() {
                           <div className="col-span-3 sm:col-span-2 text-[10px] text-zinc-400 dark:text-zinc-555 font-bold">
                             {new Date(log.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}
                           </div>
-                          
+
                           <div className="col-span-3 sm:col-span-2 font-extrabold text-zinc-800 dark:text-zinc-200">
                             {log.user}
                           </div>
 
                           <div className="col-span-3 sm:col-span-2">
-                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wide inline-block ${
-                              log.type === 'publish' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                              log.type === 'unpublish' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
-                              log.type === 'login' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
-                              log.type === 'logout' ? 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/15' :
-                              log.type === 'rename' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
-                              log.type === 'comment_add' ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' :
-                              log.type === 'comment_delete' ? 'bg-rose-500/10 text-rose-455 border border-rose-500/20' :
-                              log.type === 'download' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
-                              log.type === 'scheduler_update' ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20' :
-                              log.type === 'branding_update' ? 'bg-amber-500/10 text-amber-500 border border-amber-550/20' :
-                              'bg-zinc-500/10 text-zinc-550'
-                            }`}>
-                              {log.type === 'scheduler_update' ? 'schedule update' : 
-                               log.type === 'branding_update' ? 'branding update' : log.type}
+                            <span className={`px-2 py-0.5 rounded-full text-[8px] font-extrabold uppercase tracking-wide inline-block ${log.type === 'publish' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                log.type === 'unpublish' ? 'bg-rose-500/10 text-rose-500 border border-rose-500/20' :
+                                  log.type === 'login' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                    log.type === 'logout' ? 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/15' :
+                                      log.type === 'rename' ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' :
+                                        log.type === 'comment_add' ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' :
+                                          log.type === 'comment_delete' ? 'bg-rose-500/10 text-rose-455 border border-rose-500/20' :
+                                            log.type === 'download' ? 'bg-purple-500/10 text-purple-500 border border-purple-500/20' :
+                                              log.type === 'scheduler_update' ? 'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20' :
+                                                log.type === 'branding_update' ? 'bg-amber-500/10 text-amber-500 border border-amber-550/20' :
+                                                  'bg-zinc-500/10 text-zinc-550'
+                              }`}>
+                              {log.type === 'scheduler_update' ? 'schedule update' :
+                                log.type === 'branding_update' ? 'branding update' : log.type}
                             </span>
                           </div>
 
@@ -1823,7 +1816,7 @@ export default function App() {
                                     {log.detail}
                                   </div>
                                 )}
-                                
+
                                 <button
                                   type="button"
                                   onClick={() => setExpandedLogId(expandedLogId === log.id ? null : log.id)}
@@ -1877,11 +1870,10 @@ export default function App() {
                           type="button"
                           onClick={() => setLogsPage(prev => Math.max(prev - 1, 1))}
                           disabled={logsPage === 1}
-                          className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${
-                            logsPage === 1
+                          className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${logsPage === 1
                               ? 'border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
                               : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] hover:bg-zinc-50 dark:hover:bg-zinc-900'
-                          }`}
+                            }`}
                         >
                           <ChevronLeft className="w-3.5 h-3.5" />
                         </button>
@@ -1920,11 +1912,10 @@ export default function App() {
                                 key={page}
                                 type="button"
                                 onClick={() => setLogsPage(page)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                                  logsPage === page
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${logsPage === page
                                     ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-955 shadow-sm font-extrabold'
                                     : 'border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-650 dark:text-zinc-450 hover:bg-zinc-50 dark:hover:bg-zinc-900'
-                                }`}
+                                  }`}
                               >
                                 {page}
                               </button>
@@ -1936,11 +1927,10 @@ export default function App() {
                           type="button"
                           onClick={() => setLogsPage(prev => Math.min(prev + 1, totalLogsPages))}
                           disabled={logsPage === totalLogsPages}
-                          className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${
-                            logsPage === totalLogsPages
+                          className={`p-2 rounded-lg border text-zinc-650 dark:text-zinc-400 transition-all cursor-pointer ${logsPage === totalLogsPages
                               ? 'border-zinc-100 dark:border-zinc-900 bg-zinc-50/50 text-zinc-300 dark:text-zinc-700 cursor-not-allowed'
                               : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] hover:bg-zinc-50 dark:hover:bg-zinc-900'
-                          }`}
+                            }`}
                         >
                           <ChevronRight className="w-3.5 h-3.5" />
                         </button>
@@ -1952,10 +1942,10 @@ export default function App() {
 
             )}
             {activePage === 'profile' && (
-              <UserProfile 
-                profile={profile} 
-                onUpdateProfile={setProfile} 
-                onLogout={handleLogout} 
+              <UserProfile
+                profile={profile}
+                onUpdateProfile={setProfile}
+                onLogout={handleLogout}
                 activeTheme={activeTheme}
               />
             )}
@@ -1966,17 +1956,16 @@ export default function App() {
             <p>© 2026 Manufacturing Dashboard. Secure administrative data synchronization active.</p>
           </footer>
         </div>
-        
+
         {/* Premium Confirm Modal (Admin Views) */}
         {confirmModal.isOpen && (
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
             <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                  confirmModal.isAlert
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${confirmModal.isAlert
                     ? 'bg-amber-50 dark:bg-amber-955/20 border-amber-100 dark:border-amber-900/30 text-amber-500'
                     : 'bg-rose-50 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/30 text-rose-500'
-                }`}>
+                  }`}>
                   <ShieldAlert className="w-5 h-5" />
                 </div>
                 <div>
@@ -1988,11 +1977,11 @@ export default function App() {
                   </p>
                 </div>
               </div>
-              
+
               <p className="text-xs font-semibold text-zinc-650 dark:text-zinc-300 leading-relaxed">
                 {confirmModal.message}
               </p>
-              
+
               <div className="flex items-center justify-end gap-2.5 pt-2">
                 {!confirmModal.isAlert && (
                   <button
@@ -2006,11 +1995,10 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleConfirmAction}
-                  className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${
-                    confirmModal.isAlert
+                  className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${confirmModal.isAlert
                       ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/10'
                       : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/10'
-                  }`}
+                    }`}
                 >
                   {confirmModal.isAlert ? 'OK' : 'Yes, Confirm'}
                 </button>
@@ -2023,17 +2011,16 @@ export default function App() {
   }
   return (
     <div className={`min-h-screen bg-gradient-to-br ${activeTheme.bg} text-zinc-900 dark:text-zinc-50 transition-colors duration-300 flex`}>
-      <div className="flex-1 flex flex-col min-h-screen"> 
+      <div className="flex-1 flex flex-col min-h-screen">
         {!isPresentationMode && (
           <header className={`border-b backdrop-blur-md sticky top-0 z-30 transition-colors duration-305 flex items-center justify-between px-6 py-4.5 gap-4 ${activeTheme.header}`}>
             <div className="flex items-center gap-2 flex-wrap shrink-0">
               <button
                 onClick={() => setActivePage('admin')}
-                className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm ${
-                  activeTheme 
-                    ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm ${activeTheme
+                    ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40`
                     : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-555'
-                }`}
+                  }`}
                 title="Back to Admin Console"
               >
                 <ArrowLeft className="w-4.5 h-4.5" />
@@ -2045,11 +2032,10 @@ export default function App() {
                     setIsPresentationMode(true);
                     setPresentationPlaying(true);
                   }}
-                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${
-                    activeTheme 
-                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${activeTheme
+                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40`
                       : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
-                  }`}
+                    }`}
                   title="Enter TV Presentation Slideshow"
                 >
                   <Tv className="w-4.5 h-4.5 text-blue-500 animate-pulse" />
@@ -2064,11 +2050,10 @@ export default function App() {
                     setDownloadError('');
                     setIsDownloadModalOpen(true);
                   }}
-                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${
-                    activeTheme 
-                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm transition-all cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 ${activeTheme
+                      ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40`
                       : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
-                  }`}
+                    }`}
                   title="Download Combined PDF Reports"
                 >
                   <Download className="w-4.5 h-4.5 text-emerald-600" />
@@ -2079,13 +2064,12 @@ export default function App() {
               {publishedDashboards.length > 0 && (
                 <button
                   onClick={() => setIsCommentsOpen(!isCommentsOpen)}
-                  className={`p-2.5 rounded-xl border backdrop-blur-sm cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 transition-all ${
-                    isCommentsOpen 
+                  className={`p-2.5 rounded-xl border backdrop-blur-sm cursor-pointer shrink-0 shadow-sm flex items-center gap-1.5 transition-all ${isCommentsOpen
                       ? activeTheme.sidebarActive
-                      : activeTheme 
-                        ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40` 
+                      : activeTheme
+                        ? `${activeTheme.sidebarInactive} ${activeTheme.sidebarBorder} bg-white/40 dark:bg-zinc-900/40`
                         : 'border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0c0c0f] text-zinc-750 dark:text-zinc-350 hover:bg-zinc-55 dark:hover:bg-zinc-900 hover:text-blue-550'
-                  }`}
+                    }`}
                   title="Toggle Comments Panel"
                 >
                   <MessageSquare className="w-4.5 h-4.5" />
@@ -2095,22 +2079,20 @@ export default function App() {
             </div>
 
             {publishedDashboards.length > 0 && (
-              <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ml-2 ${
-                activeTheme 
-                  ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10` 
+              <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ml-2 ${activeTheme
+                  ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10`
                   : 'bg-zinc-100/60 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-805/30'
-              }`}>
+                }`}>
                 {publishedDashboards.map((db) => {
                   const isSelected = db.id === selectedDashboardId;
                   return (
                     <button
                       key={db.id}
                       onClick={() => setSelectedDashboardId(db.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${
-                        isSelected
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${isSelected
                           ? activeTheme ? activeTheme.sidebarActive : 'bg-zinc-900 text-white'
                           : activeTheme ? activeTheme.sidebarInactive : 'text-zinc-555 dark:text-zinc-450 hover:text-zinc-900'
-                      }`}
+                        }`}
                       title={db.name}
                     >
                       {db.name}
@@ -2170,7 +2152,7 @@ export default function App() {
               {!isPresentationMode && isCommentsOpen && (
                 <div className="w-80 shrink-0 bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-lg flex flex-col h-full relative overflow-hidden transition-all duration-300">
                   <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-blue-500 to-indigo-500" />
-                  
+
                   {/* Comments Header */}
                   <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between mt-[3px] shrink-0">
                     <div>
@@ -2182,7 +2164,7 @@ export default function App() {
                         Real-time dashboard feedback
                       </p>
                     </div>
-                    <button 
+                    <button
                       onClick={() => setIsCommentsOpen(false)}
                       className="p-1 rounded-lg hover:bg-zinc-150 dark:hover:bg-zinc-800 text-zinc-400 hover:text-zinc-600 cursor-pointer"
                     >
@@ -2200,8 +2182,8 @@ export default function App() {
                       </div>
                     ) : (
                       activeComments.map((comment) => (
-                        <div 
-                          key={comment.id} 
+                        <div
+                          key={comment.id}
                           className="bg-white dark:bg-[#09090b] border border-zinc-200/60 dark:border-zinc-800/80 p-3 rounded-xl shadow-sm space-y-1 group relative transition-all"
                         >
                           <div className="flex items-start justify-between">
@@ -2213,7 +2195,7 @@ export default function App() {
                                 {comment.timestamp ? new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now'}
                               </span>
                             </div>
-                            
+
                             {isAdminLoggedIn && (
                               <button
                                 onClick={() => handleDeleteComment(comment.id)}
@@ -2265,7 +2247,7 @@ export default function App() {
             </>
           )}
         </main>
-        
+
         {!isPresentationMode && (
           <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-550">
             <p>© 2026 Manufacturing Dashboard. Secure administrative data synchronization active.</p>
@@ -2274,16 +2256,15 @@ export default function App() {
 
         {/* TV Presentation Mode Floating Dock Controls */}
         {isPresentationMode && (
-          <div 
+          <div
             onMouseEnter={handleDockMouseEnter}
             onMouseLeave={handleDockMouseLeave}
-            className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-zinc-950/95 text-white border border-zinc-800 rounded-2xl px-5 py-3 flex items-center gap-5 shadow-2xl backdrop-blur-md select-none transition-all duration-500 ${
-              showControls 
-                ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+            className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 bg-zinc-950/95 text-white border border-zinc-800 rounded-2xl px-5 py-3 flex items-center gap-5 shadow-2xl backdrop-blur-md select-none transition-all duration-500 ${showControls
+                ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
                 : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
-            }`}
+              }`}
           >
-            
+
             {/* Play/Pause */}
             <button
               onClick={() => setPresentationPlaying(!presentationPlaying)}
@@ -2383,7 +2364,7 @@ export default function App() {
           <div className="relative w-full max-w-md overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/80 shadow-2xl rounded-2xl transition-all duration-300">
             <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500" />
             <div className="p-6 space-y-5">
-              
+
               {/* Modal Header */}
               <div className="flex items-center justify-between">
                 <div>
@@ -2495,11 +2476,10 @@ export default function App() {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
           <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
-                confirmModal.isAlert
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${confirmModal.isAlert
                   ? 'bg-amber-50 dark:bg-amber-955/20 border-amber-100 dark:border-amber-900/30 text-amber-500'
                   : 'bg-rose-50 dark:bg-rose-955/20 border-rose-105 dark:border-rose-900/30 text-rose-500'
-              }`}>
+                }`}>
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
@@ -2511,11 +2491,11 @@ export default function App() {
                 </p>
               </div>
             </div>
-            
+
             <p className="text-xs font-semibold text-zinc-650 dark:text-zinc-300 leading-relaxed">
               {confirmModal.message}
             </p>
-            
+
             <div className="flex items-center justify-end gap-2.5 pt-2">
               {!confirmModal.isAlert && (
                 <button
@@ -2529,11 +2509,10 @@ export default function App() {
               <button
                 type="button"
                 onClick={handleConfirmAction}
-                className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${
-                  confirmModal.isAlert
+                className={`px-4 py-2 rounded-xl text-white text-xs font-bold transition-all cursor-pointer shadow-md ${confirmModal.isAlert
                     ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/10'
                     : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/10'
-                }`}
+                  }`}
               >
                 {confirmModal.isAlert ? 'OK' : 'Yes, Confirm'}
               </button>
