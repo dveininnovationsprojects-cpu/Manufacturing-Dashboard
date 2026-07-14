@@ -1956,6 +1956,7 @@ export default function App() {
                 profile={profile} 
                 onUpdateProfile={setProfile} 
                 onLogout={handleLogout} 
+                activeTheme={activeTheme}
               />
             )}
 

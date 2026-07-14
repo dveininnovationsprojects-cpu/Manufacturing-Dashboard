@@ -11,9 +11,9 @@ import {
   X 
 } from 'lucide-react';
 
-const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
+const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2050/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
 
-export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
+export default function UserProfile({ profile, onUpdateProfile, onLogout, activeTheme }) {
   const [isEditing, setIsEditing] = useState(false);
   const [feedback, setFeedback] = useState(null);
   
@@ -38,6 +38,19 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   const fileInputRef = useRef(null);
+
+  // Theme Helpers
+  const getThemeBgColor = () => {
+    if (!activeTheme || !activeTheme.sidebarActive) return 'bg-purple-600';
+    // Extract the bg-... class from sidebarActive
+    const match = activeTheme.sidebarActive.match(/(bg-\[?[#a-zA-Z0-9/-]+\]?)/);
+    return match ? match[1] : 'bg-zinc-900';
+  };
+
+  const getThemeTextColor = () => {
+    const bgClass = getThemeBgColor();
+    return bgClass.replace('bg-', 'text-');
+  };
 
   const showFeedbackMsg = (type, message) => {
     setFeedback({ type, message });
@@ -123,6 +136,9 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
     }
   };
 
+  const themeBgClass = getThemeBgColor();
+  const themeTextClass = getThemeTextColor();
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 transition-all duration-300">
       {/* Feedback Alert toast */}
@@ -138,11 +154,15 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
       )}
 
       {/* Profile Header Banner */}
-      <div className="relative bg-gradient-to-r from-purple-800 via-indigo-700 to-violet-750 rounded-3xl p-6 md:p-8 text-white shadow-xl overflow-hidden border border-purple-500/10">
+      <div className={`relative rounded-3xl p-6 md:p-8 text-white shadow-xl overflow-hidden border border-white/5 ${
+        activeTheme && activeTheme.sidebarActive 
+          ? `${activeTheme.sidebarActive.replace('shadow-md', '').replace('font-extrabold', '')} bg-none`
+          : 'bg-gradient-to-r from-purple-800 via-indigo-700 to-violet-750'
+      }`}>
         {/* Curved concentric background graphics */}
         <div className="absolute right-0 top-0 w-80 h-80 bg-white/5 rounded-full -mr-20 -mt-20 pointer-events-none" />
         <div className="absolute right-24 bottom-0 w-44 h-44 bg-white/5 rounded-full -mb-12 pointer-events-none" />
-        <div className="absolute left-1/3 top-1/2 w-64 h-64 bg-indigo-500/10 rounded-full -translate-y-1/2 blur-2xl pointer-events-none" />
+        <div className="absolute left-1/3 top-1/2 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 blur-2xl pointer-events-none" />
 
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
@@ -177,7 +197,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
               <h2 className="text-2xl font-extrabold text-white tracking-tight leading-none">
                 {fullName}
               </h2>
-              <p className="text-xs text-purple-200/70 font-medium">
+              <p className="text-xs text-white/80 font-medium">
                 {email}
               </p>
               <div className="pt-2 flex flex-wrap justify-center sm:justify-start gap-2">
@@ -214,7 +234,9 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer hover:scale-[1.02]"
+                  className={`flex items-center gap-1.5 text-white font-bold text-xs py-2.5 px-5 rounded-xl shadow-md transition-all cursor-pointer hover:scale-[1.02] ${
+                    activeTheme && activeTheme.sidebarActive ? activeTheme.sidebarActive : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>Save Profile</span>
@@ -236,13 +258,15 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
       {/* Main Grid Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left Side: About, Specializations, Contact */}
+        {/* Left Side: About, Contact */}
         <div className="lg:col-span-2 space-y-6">
           
           {/* ABOUT Card */}
-          <div className="glass-panel p-6 bg-white/60 dark:bg-[#0c0c0f]/60 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[3px] bg-purple-600" />
-            <h3 className="text-[10px] font-bold text-purple-700 dark:text-purple-400 uppercase tracking-widest block mb-3">
+          <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
+            activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
+          }`}>
+            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+            <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-3 ${themeTextClass}`}>
               About
             </h3>
             {isEditing ? (
@@ -250,7 +274,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                 rows="3"
                 value={about}
                 onChange={(e) => setAbout(e.target.value)}
-                className="w-full p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-semibold bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:border-purple-600 transition-all"
+                className={`w-full p-3 rounded-xl border text-xs font-semibold bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-all focus:outline-none focus:ring-1 ${
+                  activeTheme 
+                    ? `${activeTheme.sidebarBorder} focus:border-current` 
+                    : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
+                }`}
                 placeholder="Write biography details..."
               />
             ) : (
@@ -261,9 +289,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
           </div>
 
           {/* CONTACT Card */}
-          <div className="glass-panel p-6 bg-white/60 dark:bg-[#0c0c0f]/60 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[3px] bg-purple-600" />
-            <h3 className="text-[10px] font-bold text-purple-700 dark:text-purple-400 uppercase tracking-widest block mb-4">
+          <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
+            activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
+          }`}>
+            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+            <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-4 ${themeTextClass}`}>
               Contact
             </h3>
             {isEditing ? (
@@ -274,7 +304,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     type="text" 
                     value={phone} 
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:border-purple-600 font-semibold"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
+                    }`}
                   />
                 </div>
                 <div>
@@ -284,7 +318,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     value={linkedin} 
                     onChange={(e) => setLinkedin(e.target.value)}
                     placeholder="e.g. sara-chen"
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white focus:outline-none focus:border-purple-600 font-semibold"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
+                    }`}
                   />
                 </div>
                 <div>
@@ -294,15 +332,21 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     value={github} 
                     onChange={(e) => setGithub(e.target.value)}
                     placeholder="e.g. sarachen"
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white focus:outline-none focus:border-purple-600 font-semibold"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
+                    }`}
                   />
                 </div>
               </div>
             ) : (
               <div className="flex flex-wrap gap-3">
                 {profile.phone && (
-                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold text-zinc-700 dark:text-zinc-350">
-                    <Phone className="w-3.5 h-3.5 text-purple-500" />
+                  <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold ${
+                    activeTheme ? `${activeTheme.sidebarBorder} text-zinc-700 dark:text-zinc-350` : 'border-zinc-200 text-zinc-700'
+                  }`}>
+                    <Phone className={`w-3.5 h-3.5 ${themeTextClass}`} />
                     <span>{profile.phone}</span>
                   </div>
                 )}
@@ -310,9 +354,14 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                 {profile.email && (
                   <a 
                     href={`mailto:${profile.email}`}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold text-zinc-700 dark:text-zinc-350 hover:border-purple-300 dark:hover:border-purple-800 hover:text-purple-600 transition-all"
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold transition-all ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} text-zinc-700 dark:text-zinc-350 hover:text-current` 
+                        : 'border-zinc-200 text-zinc-700 hover:text-purple-600'
+                    }`}
+                    style={{ color: activeTheme ? undefined : '#9333ea' }}
                   >
-                    <Mail className="w-3.5 h-3.5 text-red-500" />
+                    <Mail className={`w-3.5 h-3.5 ${themeTextClass}`} />
                     <span>{profile.email}</span>
                   </a>
                 )}
@@ -326,9 +375,13 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
         <div className="space-y-6">
           
           {/* MENTOR DETAILS Card */}
-          <div className="glass-panel p-6 bg-white/60 dark:bg-[#0c0c0f]/60 relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[3px] bg-purple-600" />
-            <h3 className="text-[10px] font-bold text-purple-700 dark:text-purple-400 uppercase tracking-widest block mb-4 border-b border-zinc-150 dark:border-zinc-850 pb-2">
+          <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
+            activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
+          }`}>
+            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+            <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-4 border-b pb-2 ${themeTextClass} ${
+              activeTheme ? activeTheme.sidebarBorder : 'border-zinc-150'
+            }`}>
               Admin Details
             </h3>
             
@@ -340,52 +393,72 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     type="text" 
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="p-1 rounded border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:border-purple-600"
+                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 focus:border-purple-600'
+                    }`}
                   />
                 ) : (
                   <span className="font-bold text-zinc-850 dark:text-zinc-200">{profile.fullName}</span>
                 )}
               </div>
-              <div className="flex justify-between items-center py-0.5 border-t border-zinc-100 dark:border-zinc-900/40 pt-2 min-h-[28px]">
+              <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
+                activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
+              }`}>
                 <span className="font-semibold text-zinc-400 dark:text-zinc-500">Email</span>
                 {isEditing ? (
                   <input 
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="p-1 rounded border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-right bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:border-purple-600"
+                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 focus:border-purple-600'
+                    }`}
                   />
                 ) : (
                   <span className="font-bold text-zinc-850 dark:text-zinc-200 truncate max-w-[160px]" title={profile.email}>{profile.email}</span>
                 )}
               </div>
-              <div className="flex justify-between items-center py-0.5 border-t border-zinc-100 dark:border-zinc-900/40 pt-2 min-h-[28px]">
+              <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
+                activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
+              }`}>
                 <span className="font-semibold text-zinc-400 dark:text-zinc-500">Account</span>
                 {isEditing ? (
                   <select 
                     value={status} 
                     onChange={(e) => setStatus(e.target.value)}
-                    className="p-1 rounded border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white cursor-pointer focus:outline-none"
+                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white cursor-pointer focus:outline-none focus:ring-1 ${
+                      activeTheme ? activeTheme.sidebarBorder : 'border-zinc-200'
+                    }`}
                   >
                     <option value="Active">ACTIVE</option>
                     <option value="Inactive">INACTIVE</option>
                     <option value="Pending">PENDING</option>
                   </select>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 text-[10px] font-extrabold uppercase rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 text-[10px] font-extrabold uppercase rounded-full">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     {profile.status}
                   </span>
                 )}
               </div>
-              <div className="flex justify-between items-center py-0.5 border-t border-zinc-100 dark:border-zinc-900/40 pt-2 min-h-[28px]">
+              <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
+                activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
+              }`}>
                 <span className="font-semibold text-zinc-400 dark:text-zinc-500">Joined</span>
                 {isEditing ? (
                   <input 
                     type="text" 
                     value={joinedDate}
                     onChange={(e) => setJoinedDate(e.target.value)}
-                    className="p-1 rounded border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:border-purple-600"
+                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 focus:border-purple-600'
+                    }`}
                   />
                 ) : (
                   <span className="font-bold text-zinc-850 dark:text-zinc-200">{profile.joinedDate}</span>
@@ -396,9 +469,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
 
           {/* Security Credentials Card - Editable only in Edit Mode */}
           {isEditing && (
-            <div className="glass-panel p-6 bg-white/60 dark:bg-[#0c0c0f]/60 relative overflow-hidden transition-all duration-300">
+            <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
+              activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
+            }`}>
               <div className="absolute top-0 left-0 w-full h-[3px] bg-rose-500" />
-              <h3 className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest block mb-1">
+              <h3 className="text-[10px] font-bold text-rose-600 dark:text-rose-450 uppercase tracking-widest block mb-1">
                 Security Credentials
               </h3>
               <p className="text-[9px] text-zinc-450 dark:text-zinc-500 font-semibold mb-3 leading-tight">
@@ -412,7 +487,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     type="text" 
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
+                        : 'border-zinc-200 focus:border-rose-500'
+                    }`}
                   />
                 </div>
                 
@@ -423,7 +502,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     placeholder="••••••••"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
+                        : 'border-zinc-200 focus:border-rose-500'
+                    }`}
                   />
                 </div>
                 
@@ -434,7 +517,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     placeholder="Min 6 chars"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
+                        : 'border-zinc-200 focus:border-rose-500'
+                    }`}
                   />
                 </div>
                 
@@ -445,7 +532,11 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout }) {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500"
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
+                        : 'border-zinc-200 focus:border-rose-500'
+                    }`}
                   />
                 </div>
               </div>
