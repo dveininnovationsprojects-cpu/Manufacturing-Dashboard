@@ -288,9 +288,20 @@ export default function App() {
     };
   });
 
-  useEffect(() => {
-    localStorage.setItem('admin_profile', JSON.stringify(profile));
-  }, [profile]);
+  const handleUpdateProfile = async (updatedProfile) => {
+    setProfile(updatedProfile);
+    localStorage.setItem('admin_profile', JSON.stringify(updatedProfile));
+    if (db) {
+      try {
+        await updateDoc(doc(db, "dashboard_settings", "state"), {
+          profile: updatedProfile,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn("Failed to sync profile update to Firebase:", e);
+      }
+    }
+  };
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
     return localStorage.getItem('admin_logged_in') === 'true';
   });
@@ -510,6 +521,15 @@ export default function App() {
         }
         const dbLogo = docSnap.data().logo || '';
         setCustomLogo(dbLogo);
+        const dbTheme = docSnap.data().theme;
+        if (dbTheme) {
+          setCustomTheme(dbTheme);
+          localStorage.setItem('custom_theme', dbTheme);
+        }
+        const dbProfile = docSnap.data().profile;
+        if (dbProfile) {
+          setProfile(dbProfile);
+        }
       } else {
         try {
           await setDoc(doc(db, "dashboard_settings", "state"), {
@@ -524,6 +544,17 @@ export default function App() {
             }],
             theme: 'classic-cream',
             logo: '',
+            profile: {
+              fullName: 'Sara Chen',
+              email: 'sara@dvein.com',
+              status: 'Active',
+              joinedDate: 'March 10, 2023',
+              about: 'HR executives and Financial operations',
+              specializations: ['HR', 'Management', 'Finance', 'operation'],
+              phone: '1234567890',
+              website: 'www.dvein.com',
+              avatar: ''
+            },
             updatedAt: new Date().toISOString()
           });
         } catch (e) {
@@ -1132,11 +1163,23 @@ export default function App() {
         try {
           await updateDoc(doc(db, "dashboard_settings", "state"), {
             logo: logoBase64,
+            theme: themeName,
             logs: updatedLogs,
             updatedAt: new Date().toISOString()
           });
         } catch (e) {
           console.warn("Failed to sync logo branding update to Firestore:", e);
+        }
+      }
+    } else {
+      if (db) {
+        try {
+          await updateDoc(doc(db, "dashboard_settings", "state"), {
+            theme: themeName,
+            updatedAt: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn("Failed to sync theme branding update to Firestore:", e);
         }
       }
     }
@@ -1930,7 +1973,7 @@ export default function App() {
             {activePage === 'profile' && (
               <UserProfile
                 profile={profile}
-                onUpdateProfile={setProfile}
+                onUpdateProfile={handleUpdateProfile}
                 onLogout={handleLogout}
                 activeTheme={activeTheme}
               />
