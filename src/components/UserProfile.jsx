@@ -170,7 +170,6 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
     }
   };
 
-  const themeBgClass = getThemeBgColor();
   const themeTextClass = getThemeTextColor();
 
   return (
@@ -298,7 +297,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
           <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
             activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
           }`}>
-            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+
             <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-3 ${themeTextClass}`}>
               About
             </h3>
@@ -325,7 +324,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
           <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
             activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
           }`}>
-            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+
             <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-4 ${themeTextClass}`}>
               Contact
             </h3>
@@ -425,7 +424,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
           <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
             activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
           }`}>
-            <div className={`absolute top-0 left-0 w-full h-[3px] ${themeBgClass}`} />
+
             <h3 className={`text-[10px] font-bold uppercase tracking-widest block mb-4 border-b pb-2 ${themeTextClass} ${
               activeTheme ? activeTheme.sidebarBorder : 'border-zinc-150'
             }`}>
@@ -481,7 +480,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
             <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
               activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
             }`}>
-              <div className="absolute top-0 left-0 w-full h-[3px] bg-rose-500" />
+
               <h3 className="text-[10px] font-bold text-rose-600 dark:text-rose-450 uppercase tracking-widest block mb-1">
                 Security Credentials
               </h3>
