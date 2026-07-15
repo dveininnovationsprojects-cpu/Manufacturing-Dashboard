@@ -92,24 +92,7 @@ const THEME_MAP = {
     logoutButton: 'text-rose-600 hover:bg-rose-50 hover:text-rose-700',
     preview: ['#FDFBFF', '#F5EFFF', '#8B5CF6']
   },
-  'sage-garden': {
-    name: 'Sage Garden',
-    bg: 'from-[#FCFDFB] via-[#F1F8F3] to-[#E1EFE4]',
-    header: 'bg-white/70 border-emerald-200/50',
-    card: 'bg-white border-emerald-100 text-black dark:text-black',
-    text: 'text-black dark:text-black',
-    subText: 'text-zinc-800 dark:text-zinc-800',
-    badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    sidebar: 'bg-[#F1F8F3] text-emerald-900 border-emerald-200/80',
-    sidebarActive: 'bg-emerald-600 text-white shadow-md font-extrabold',
-    sidebarInactive: 'text-emerald-700 dark:text-emerald-700 hover:text-black hover:bg-emerald-100',
-    sidebarCard: 'bg-white border-emerald-200/60 shadow-sm',
-    sidebarCardTitle: 'text-emerald-600',
-    sidebarCardValue: 'text-emerald-900',
-    sidebarBorder: 'border-emerald-200/60',
-    logoutButton: 'text-rose-600 hover:bg-rose-50 hover:text-rose-700',
-    preview: ['#FCFDFB', '#F1F8F3', '#10B981']
-  },
+
   'slate-grey': {
     name: 'Slate Grey',
     bg: 'from-[#F8FAFC] via-[#F1F5F9] to-[#E2E8F0]',
