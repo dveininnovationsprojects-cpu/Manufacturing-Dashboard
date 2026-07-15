@@ -8,10 +8,11 @@ import {
   Edit2, 
   Mail, 
   Phone, 
-  X 
+  X,
+  Globe
 } from 'lucide-react';
 
-const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2050/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
+const DEFAULT_AVATAR = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="%238b5cf6"/><stop offset="100%" stop-color="%236366f1"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(%23g)"/><path d="M50 22c-8.3 0-15 6.7-15 15s6.7 15 15 15 15-6.7 15-15-6.7-15-15-15zm0 35c-16.6 0-30 10-30 22.5h60c0-12.5-13.4-22.5-30-22.5z" fill="white" opacity="0.95"/></svg>`;
 
 export default function UserProfile({ profile, onUpdateProfile, onLogout, activeTheme }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -25,8 +26,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
   const [about, setAbout] = useState(profile.about);
   const [specializationsText, setSpecializationsText] = useState(profile.specializations.join(', '));
   const [phone, setPhone] = useState(profile.phone);
-  const [linkedin, setLinkedin] = useState(profile.linkedin);
-  const [github, setGithub] = useState(profile.github);
+  const [website, setWebsite] = useState(profile.website || '');
   const [avatar, setAvatar] = useState(profile.avatar);
 
   // Security Credentials Local States
@@ -37,12 +37,19 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Confirmation Modal state for security credentials update
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: null
+  });
+
   const fileInputRef = useRef(null);
 
   // Theme Helpers
   const getThemeBgColor = () => {
     if (!activeTheme || !activeTheme.sidebarActive) return 'bg-purple-600';
-    // Extract the bg-... class from sidebarActive
     const match = activeTheme.sidebarActive.match(/(bg-\[?[#a-zA-Z0-9/-]+\]?)/);
     return match ? match[1] : 'bg-zinc-900';
   };
@@ -78,9 +85,27 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
     e.preventDefault();
     setFeedback(null);
 
-    // If changing security details (username or password)
     const savedPassword = localStorage.getItem('admin_auth_password') || 'admin@123';
     const isSecurityUpdating = newPassword || adminUsername !== (localStorage.getItem('admin_username') || 'admin');
+
+    const executeProfileUpdate = () => {
+      const updatedProfile = {
+        ...profile,
+        fullName,
+        email,
+        status,
+        joinedDate,
+        about,
+        specializations: specializationsText.split(',').map(s => s.trim()).filter(Boolean),
+        phone,
+        website,
+        avatar
+      };
+
+      onUpdateProfile(updatedProfile);
+      setIsEditing(false);
+      showFeedbackMsg('success', 'Profile updated successfully!');
+    };
 
     if (isSecurityUpdating) {
       if (!currentPassword) {
@@ -100,34 +125,31 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
           showFeedbackMsg('error', 'New passwords do not match.');
           return;
         }
-        localStorage.setItem('admin_auth_password', newPassword);
       }
-      localStorage.setItem('admin_username', adminUsername);
-      
-      // Reset security password fields
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
+
+      // Prompt confirmation modal for changing security credentials
+      setConfirmModal({
+        isOpen: true,
+        title: 'Confirm Credentials Update',
+        message: 'Are you sure you want to update the administrator login username or password?',
+        onConfirm: () => {
+          if (newPassword) {
+            localStorage.setItem('admin_auth_password', newPassword);
+          }
+          localStorage.setItem('admin_username', adminUsername);
+          
+          // Reset security password fields
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmPassword('');
+
+          // Proceed with rest of the profile update
+          executeProfileUpdate();
+        }
+      });
+    } else {
+      executeProfileUpdate();
     }
-
-    // Save profile details
-    const updatedProfile = {
-      ...profile,
-      fullName,
-      email,
-      status,
-      joinedDate,
-      about,
-      specializations: specializationsText.split(',').map(s => s.trim()).filter(Boolean),
-      phone,
-      linkedin,
-      github,
-      avatar
-    };
-
-    onUpdateProfile(updatedProfile);
-    setIsEditing(false);
-    showFeedbackMsg('success', 'Profile updated successfully!');
   };
 
   const triggerFileSelect = () => {
@@ -145,7 +167,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
       {feedback && (
         <div className={`fixed top-6 right-6 z-50 p-4 rounded-xl text-xs font-semibold shadow-xl border flex items-center gap-2 ${
           feedback.type === 'success' 
-            ? 'bg-emerald-50 dark:bg-emerald-950/90 text-emerald-600 dark:text-emerald-400 border-emerald-250 dark:border-emerald-900' 
+            ? 'bg-emerald-50 dark:bg-emerald-955/90 text-emerald-600 dark:text-emerald-400 border-emerald-250 dark:border-emerald-900' 
             : 'bg-rose-50 dark:bg-rose-955/90 text-rose-600 dark:text-rose-400 border-rose-250 dark:border-rose-900'
         }`}>
           {feedback.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-rose-500" />}
@@ -222,8 +244,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     setAbout(profile.about);
                     setSpecializationsText(profile.specializations.join(', '));
                     setPhone(profile.phone);
-                    setLinkedin(profile.linkedin);
-                    setGithub(profile.github);
+                    setWebsite(profile.website || '');
                     setAvatar(profile.avatar);
                     setIsEditing(false);
                   }}
@@ -282,7 +303,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                 placeholder="Write biography details..."
               />
             ) : (
-              <p className="text-xs text-zinc-650 dark:text-zinc-400 font-semibold leading-relaxed">
+              <p className="text-xs font-semibold leading-relaxed">
                 {profile.about || "No bio description provided."}
               </p>
             )}
@@ -304,20 +325,6 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     type="text" 
                     value={phone} 
                     onChange={(e) => setPhone(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
-                      activeTheme 
-                        ? `${activeTheme.sidebarBorder} focus:border-current` 
-                        : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">LinkedIn Username</label>
-                  <input 
-                    type="text" 
-                    value={linkedin} 
-                    onChange={(e) => setLinkedin(e.target.value)}
-                    placeholder="e.g. sara-chen"
                     className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-current` 
@@ -326,12 +333,25 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                   />
                 </div>
                 <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">GitHub Username</label>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} focus:border-current` 
+                        : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
+                    }`}
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">Web Site</label>
                   <input 
                     type="text" 
-                    value={github} 
-                    onChange={(e) => setGithub(e.target.value)}
-                    placeholder="e.g. sarachen"
+                    value={website} 
+                    onChange={(e) => setWebsite(e.target.value)}
+                    placeholder="e.g. www.dvein.com"
                     className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-current` 
@@ -344,7 +364,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
               <div className="flex flex-wrap gap-3">
                 {profile.phone && (
                   <div className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold ${
-                    activeTheme ? `${activeTheme.sidebarBorder} text-zinc-700 dark:text-zinc-350` : 'border-zinc-200 text-zinc-700'
+                    activeTheme ? `${activeTheme.sidebarBorder}` : 'border-zinc-200'
                   }`}>
                     <Phone className={`w-3.5 h-3.5 ${themeTextClass}`} />
                     <span>{profile.phone}</span>
@@ -356,13 +376,28 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     href={`mailto:${profile.email}`}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold transition-all ${
                       activeTheme 
-                        ? `${activeTheme.sidebarBorder} text-zinc-700 dark:text-zinc-350 hover:text-current` 
-                        : 'border-zinc-200 text-zinc-700 hover:text-purple-600'
+                        ? `${activeTheme.sidebarBorder} hover:text-current` 
+                        : 'border-zinc-200 hover:text-purple-650'
                     }`}
-                    style={{ color: activeTheme ? undefined : '#9333ea' }}
                   >
                     <Mail className={`w-3.5 h-3.5 ${themeTextClass}`} />
                     <span>{profile.email}</span>
+                  </a>
+                )}
+
+                {profile.website && (
+                  <a 
+                    href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border bg-zinc-50/50 dark:bg-zinc-900/30 text-xs font-bold transition-all ${
+                      activeTheme 
+                        ? `${activeTheme.sidebarBorder} hover:text-current` 
+                        : 'border-zinc-200 hover:text-purple-650'
+                    }`}
+                  >
+                    <Globe className={`w-3.5 h-3.5 ${themeTextClass}`} />
+                    <span>{profile.website}</span>
                   </a>
                 )}
               </div>
@@ -371,10 +406,10 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
 
         </div>
 
-        {/* Right Side: Mentor Details & Security Credentials */}
+        {/* Right Side: Admin Details & Security Credentials */}
         <div className="space-y-6">
           
-          {/* MENTOR DETAILS Card */}
+          {/* ADMIN DETAILS Card */}
           <div className={`p-6 rounded-2xl border shadow-sm relative overflow-hidden transition-all duration-300 ${
             activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
           }`}>
@@ -387,7 +422,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
             
             <div className="space-y-3.5 text-xs">
               <div className="flex justify-between items-center py-0.5 min-h-[28px]">
-                <span className="font-semibold text-zinc-400 dark:text-zinc-500">Full Name</span>
+                <span className="font-semibold text-zinc-400 dark:text-zinc-550">Full Name</span>
                 {isEditing ? (
                   <input 
                     type="text" 
@@ -400,32 +435,13 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     }`}
                   />
                 ) : (
-                  <span className="font-bold text-zinc-850 dark:text-zinc-200">{profile.fullName}</span>
+                  <span className="font-bold">{profile.fullName}</span>
                 )}
               </div>
               <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
                 activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
               }`}>
-                <span className="font-semibold text-zinc-400 dark:text-zinc-500">Email</span>
-                {isEditing ? (
-                  <input 
-                    type="email" 
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:ring-1 ${
-                      activeTheme 
-                        ? `${activeTheme.sidebarBorder} focus:border-current` 
-                        : 'border-zinc-200 focus:border-purple-600'
-                    }`}
-                  />
-                ) : (
-                  <span className="font-bold text-zinc-850 dark:text-zinc-200 truncate max-w-[160px]" title={profile.email}>{profile.email}</span>
-                )}
-              </div>
-              <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
-                activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
-              }`}>
-                <span className="font-semibold text-zinc-400 dark:text-zinc-500">Account</span>
+                <span className="font-semibold text-zinc-400 dark:text-zinc-550">Account</span>
                 {isEditing ? (
                   <select 
                     value={status} 
@@ -443,25 +459,6 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     {profile.status}
                   </span>
-                )}
-              </div>
-              <div className={`flex justify-between items-center py-0.5 border-t pt-2 min-h-[28px] ${
-                activeTheme ? activeTheme.sidebarBorder : 'border-zinc-100'
-              }`}>
-                <span className="font-semibold text-zinc-400 dark:text-zinc-500">Joined</span>
-                {isEditing ? (
-                  <input 
-                    type="text" 
-                    value={joinedDate}
-                    onChange={(e) => setJoinedDate(e.target.value)}
-                    className={`p-1 rounded border text-xs font-semibold text-right bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white max-w-[150px] focus:outline-none focus:ring-1 ${
-                      activeTheme 
-                        ? `${activeTheme.sidebarBorder} focus:border-current` 
-                        : 'border-zinc-200 focus:border-purple-600'
-                    }`}
-                  />
-                ) : (
-                  <span className="font-bold text-zinc-850 dark:text-zinc-200">{profile.joinedDate}</span>
                 )}
               </div>
             </div>
@@ -482,7 +479,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
               
               <div className="space-y-3.5 text-xs">
                 <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">Admin Username</label>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-555 uppercase block mb-1">Admin Username</label>
                   <input 
                     type="text" 
                     value={adminUsername}
@@ -496,7 +493,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                 </div>
                 
                 <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">Current Password (Required)</label>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-555 uppercase block mb-1">Current Password (Required)</label>
                   <input 
                     type="password" 
                     placeholder="••••••••"
@@ -511,7 +508,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                 </div>
                 
                 <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">New Password</label>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-555 uppercase block mb-1">New Password</label>
                   <input 
                     type="password" 
                     placeholder="Min 6 chars"
@@ -526,7 +523,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                 </div>
                 
                 <div>
-                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-500 uppercase block mb-1">Confirm New Password</label>
+                  <label className="text-[9px] font-bold text-zinc-400 dark:text-zinc-555 uppercase block mb-1">Confirm New Password</label>
                   <input 
                     type="password" 
                     placeholder="••••••••"
@@ -546,6 +543,51 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
         </div>
 
       </div>
+
+      {/* Local Double-Confirmation Modal for Security Credentials Update */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
+          <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-left">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-rose-50 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/30 text-rose-500">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className={`text-sm font-extrabold uppercase tracking-wider ${themeTextClass}`}>
+                  {confirmModal.title}
+                </h3>
+                <p className="text-[9px] text-zinc-450 dark:text-zinc-555 font-bold uppercase tracking-wider mt-0.5">
+                  Verification Required
+                </p>
+              </div>
+            </div>
+            
+            <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-350 leading-relaxed">
+              {confirmModal.message}
+            </p>
+            
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null })}
+                className="px-4 py-2 rounded-xl border border-zinc-200 dark:border-zinc-850 bg-white dark:bg-transparent text-xs font-bold text-zinc-650 dark:text-zinc-450 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-all cursor-pointer shadow-sm"
+              >
+                No, Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                  setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null });
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all cursor-pointer shadow-md shadow-rose-600/10"
+              >
+                Yes, Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

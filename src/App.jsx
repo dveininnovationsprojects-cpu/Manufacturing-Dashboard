@@ -96,9 +96,9 @@ const THEME_MAP = {
     name: 'Sage Garden',
     bg: 'from-[#FCFDFB] via-[#F1F8F3] to-[#E1EFE4]',
     header: 'bg-white/70 border-emerald-200/50',
-    card: 'bg-white border-emerald-150 text-emerald-955',
-    text: 'text-emerald-955',
-    subText: 'text-emerald-650',
+    card: 'bg-white border-emerald-150 text-black dark:text-black',
+    text: 'text-black dark:text-black',
+    subText: 'text-zinc-800 dark:text-zinc-800',
     badge: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
     sidebar: 'bg-[#F1F8F3] text-emerald-900 border-emerald-200/80',
     sidebarActive: 'bg-emerald-650 text-white shadow-md font-extrabold',
@@ -186,9 +186,9 @@ const THEME_MAP = {
     name: 'Mint Green',
     bg: 'from-[#FBFDFB] via-[#E8F8EE] to-[#D1F2DD]',
     header: 'bg-white/70 border-teal-200/50',
-    card: 'bg-white border-teal-150 text-teal-955',
-    text: 'text-teal-955',
-    subText: 'text-teal-650',
+    card: 'bg-white border-teal-150 text-black dark:text-black',
+    text: 'text-black dark:text-black',
+    subText: 'text-zinc-800 dark:text-zinc-800',
     badge: 'bg-teal-500/10 text-teal-600 border-teal-500/20',
     sidebar: 'bg-[#E8F8EE] text-teal-900 border-teal-200/80',
     sidebarActive: 'bg-teal-650 text-white shadow-md font-extrabold',
@@ -240,9 +240,9 @@ const THEME_MAP = {
     name: 'Silver Lilac',
     bg: 'from-[#FAF9FC] via-[#F3EEFA] to-[#E4D9F5]',
     header: 'bg-white/70 border-indigo-200/40',
-    card: 'bg-white border-indigo-150 text-indigo-955',
-    text: 'text-indigo-955',
-    subText: 'text-indigo-650',
+    card: 'bg-white border-indigo-150 text-black dark:text-black',
+    text: 'text-black dark:text-black',
+    subText: 'text-zinc-800 dark:text-zinc-800',
     badge: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20',
     sidebar: 'bg-[#F3EEFA] text-indigo-805 border-indigo-200/60',
     sidebarActive: 'bg-indigo-650 text-white shadow-md font-extrabold',
@@ -296,8 +296,7 @@ export default function App() {
       about: 'HR executives and Financial operations',
       specializations: ['HR', 'Management', 'Finance', 'operation'],
       phone: '1234567890',
-      linkedin: 'sara-chen',
-      github: 'sarachen',
+      website: 'www.dvein.com',
       avatar: '',
       coursesTaught: 1,
       totalStudents: 32,
@@ -1290,7 +1289,7 @@ export default function App() {
   // 2. Admin Console View (Sidebar Layout)
   if (['admin', 'logs', 'scheduler', 'branding', 'profile'].includes(activePage)) {
     return (
-      <div className={`h-screen overflow-hidden bg-gradient-to-br ${activeTheme.bg} text-zinc-900 flex`}>
+      <div className={`h-screen overflow-hidden bg-gradient-to-br ${activeTheme.bg} ${activeTheme.text} flex`}>
         <aside className={`w-64 h-screen border-r flex flex-col justify-between p-5 shrink-0 select-none ${activeTheme.sidebar}`}>
           <div className="space-y-6">
             <div className={`px-2 py-3 border-b ${activeTheme.sidebarBorder} flex items-center ${customLogo ? 'justify-center' : 'gap-2'}`}>
@@ -2010,7 +2009,7 @@ export default function App() {
     );
   }
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${activeTheme.bg} text-zinc-900 dark:text-zinc-50 transition-colors duration-300 flex`}>
+    <div className={`min-h-screen bg-gradient-to-br ${activeTheme.bg} ${activeTheme.text} transition-colors duration-300 flex`}>
       <div className="flex-1 flex flex-col min-h-screen">
         {!isPresentationMode && (
           <header className={`border-b backdrop-blur-md sticky top-0 z-30 transition-colors duration-305 flex items-center justify-between px-6 py-4.5 gap-4 ${activeTheme.header}`}>
