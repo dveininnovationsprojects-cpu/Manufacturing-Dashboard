@@ -347,6 +347,7 @@ export default function App() {
 
   const dashboardsRef = useRef(dashboards);
   const logsRef = useRef(logs);
+  const dashboardsNavRef = useRef(null);
 
   const [customTheme, setCustomTheme] = useState(() => localStorage.getItem('custom_theme') || 'classic-cream');
   const [customLogo, setCustomLogo] = useState('');
@@ -1997,7 +1998,7 @@ export default function App() {
           </main>
 
           <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-555 shrink-0">
-            <p>© 2026 Manufacturing Dashboard. Secure administrative data synchronization active.</p>
+            <p>© 2026 Manufacturing Dashboard.</p>
           </footer>
         </div>
 
@@ -2124,10 +2125,13 @@ export default function App() {
 
             {publishedDashboards.length > 0 && (
               <div className="flex items-center gap-1.5 flex-1 ml-2">
-                <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ${activeTheme
+                <nav 
+                  ref={dashboardsNavRef}
+                  className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ${activeTheme
                     ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10`
                     : 'bg-zinc-100/60 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-805/30'
-                  }`}>
+                  }`}
+                >
                   {publishedDashboards.map((db) => {
                     const isSelected = db.id === selectedDashboardId;
                     return (
@@ -2147,9 +2151,30 @@ export default function App() {
                 </nav>
 
                 {publishedDashboards.length > 5 && (
-                  <div className="flex flex-col items-center justify-center shrink-0 text-zinc-400 dark:text-zinc-500 animate-bounce pr-1" title="Scroll down for more dashboards">
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (dashboardsNavRef.current) {
+                        const nav = dashboardsNavRef.current;
+                        const isAtBottom = Math.abs((nav.scrollHeight - nav.clientHeight) - nav.scrollTop) < 2;
+                        if (isAtBottom) {
+                          nav.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                          });
+                        } else {
+                          nav.scrollBy({
+                            top: 50,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }
+                    }}
+                    className="flex items-center justify-center shrink-0 w-8 h-8 rounded-xl border border-zinc-300 dark:border-zinc-700 bg-zinc-200 dark:bg-zinc-800 text-zinc-850 dark:text-zinc-100 hover:bg-zinc-300 dark:hover:bg-zinc-700 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm"
+                    title="Scroll down for more dashboards"
+                  >
+                    <ChevronDown className="w-4.5 h-4.5 stroke-[3px]" />
+                  </button>
                 )}
               </div>
             )}
@@ -2302,7 +2327,7 @@ export default function App() {
 
         {!isPresentationMode && (
           <footer className="border-t border-zinc-200 dark:border-zinc-800 bg-white/40 dark:bg-[#0c0c0f]/40 py-5 text-center text-[10px] font-semibold text-zinc-400 dark:text-zinc-550">
-            <p>© 2026 Manufacturing Dashboard. Secure administrative data synchronization active.</p>
+            <p>© 2026 Manufacturing Dashboard.</p>
           </footer>
         )}
 
