@@ -167,8 +167,8 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
       {feedback && (
         <div className={`fixed top-6 right-6 z-50 p-4 rounded-xl text-xs font-semibold shadow-xl border flex items-center gap-2 ${
           feedback.type === 'success' 
-            ? 'bg-emerald-50 dark:bg-emerald-955/90 text-emerald-600 dark:text-emerald-400 border-emerald-250 dark:border-emerald-900' 
-            : 'bg-rose-50 dark:bg-rose-955/90 text-rose-600 dark:text-rose-400 border-rose-250 dark:border-rose-900'
+            ? 'bg-emerald-50 dark:bg-emerald-900/90 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900' 
+            : 'bg-rose-50 dark:bg-rose-900/90 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900'
         }`}>
           {feedback.type === 'success' ? <CheckCircle className="w-4 h-4 text-emerald-500" /> : <AlertCircle className="w-4 h-4 text-rose-500" />}
           <span>{feedback.message}</span>
@@ -352,7 +352,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     value={website} 
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="e.g. www.dvein.com"
-                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-current` 
                         : 'border-zinc-200 dark:border-zinc-800 focus:border-purple-600'
@@ -455,7 +455,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     <option value="Pending">PENDING</option>
                   </select>
                 ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-955/20 text-emerald-600 text-[10px] font-extrabold uppercase rounded-full">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 text-[10px] font-extrabold uppercase rounded-full">
                     <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     {profile.status}
                   </span>
@@ -470,7 +470,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
               activeTheme ? activeTheme.card : 'glass-panel bg-white/60 dark:bg-[#0c0c0f]/60'
             }`}>
               <div className="absolute top-0 left-0 w-full h-[3px] bg-rose-500" />
-              <h3 className="text-[10px] font-bold text-rose-600 dark:text-rose-450 uppercase tracking-widest block mb-1">
+              <h3 className="text-[10px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest block mb-1">
                 Security Credentials
               </h3>
               <p className="text-[9px] text-zinc-450 dark:text-zinc-500 font-semibold mb-3 leading-tight">
@@ -499,7 +499,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     placeholder="••••••••"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
                         : 'border-zinc-200 focus:border-rose-500'
@@ -514,7 +514,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     placeholder="Min 6 chars"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
                         : 'border-zinc-200 focus:border-rose-500'
@@ -529,7 +529,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-955 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
+                    className={`w-full px-3 py-2 rounded-xl border text-xs bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white font-semibold transition-all focus:outline-none focus:ring-1 ${
                       activeTheme 
                         ? `${activeTheme.sidebarBorder} focus:border-rose-500` 
                         : 'border-zinc-200 focus:border-rose-500'
@@ -549,7 +549,7 @@ export default function UserProfile({ profile, onUpdateProfile, onLogout, active
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-sm select-none">
           <div className="bg-white dark:bg-[#0c0c0f] border border-zinc-200 dark:border-zinc-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl space-y-4 text-left">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-rose-50 dark:bg-rose-955/20 border-rose-200 dark:border-rose-900/30 text-rose-500">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-900/30 text-rose-500">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
