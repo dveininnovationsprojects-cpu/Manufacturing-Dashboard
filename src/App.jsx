@@ -17,6 +17,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Download,
   MessageSquare,
   Trash2,
@@ -1971,12 +1972,26 @@ export default function App() {
 
             )}
             {activePage === 'profile' && (
-              <UserProfile
-                profile={profile}
-                onUpdateProfile={handleUpdateProfile}
-                onLogout={handleLogout}
-                activeTheme={activeTheme}
-              />
+              <div className="space-y-6 animate-fade-in select-none">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-xl font-extrabold text-zinc-900 dark:text-white flex items-center gap-2">
+                      <User className="w-5.5 h-5.5 text-blue-500" />
+                      <span>UserProfile Settings</span>
+                    </h1>
+                    <p className="text-[10px] text-zinc-400 dark:text-zinc-550 font-bold uppercase tracking-wider mt-1">
+                      Manage administrator profile information, contact cards, and login passwords
+                    </p>
+                  </div>
+                </div>
+
+                <UserProfile
+                  profile={profile}
+                  onUpdateProfile={handleUpdateProfile}
+                  onLogout={handleLogout}
+                  activeTheme={activeTheme}
+                />
+              </div>
             )}
 
           </main>
@@ -2108,27 +2123,35 @@ export default function App() {
             </div>
 
             {publishedDashboards.length > 0 && (
-              <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ml-2 ${activeTheme
-                  ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10`
-                  : 'bg-zinc-100/60 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-805/30'
-                }`}>
-                {publishedDashboards.map((db) => {
-                  const isSelected = db.id === selectedDashboardId;
-                  return (
-                    <button
-                      key={db.id}
-                      onClick={() => setSelectedDashboardId(db.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${isSelected
-                          ? activeTheme ? activeTheme.sidebarActive : 'bg-zinc-900 text-white'
-                          : activeTheme ? activeTheme.sidebarInactive : 'text-zinc-555 dark:text-zinc-450 hover:text-zinc-900'
-                        }`}
-                      title={db.name}
-                    >
-                      {db.name}
-                    </button>
-                  );
-                })}
-              </nav>
+              <div className="flex items-center gap-1.5 flex-1 ml-2">
+                <nav className={`flex-1 grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[82px] scrollbar-none p-1.5 rounded-2xl border ${activeTheme
+                    ? `${activeTheme.sidebarBorder} bg-white/30 dark:bg-black/10`
+                    : 'bg-zinc-100/60 dark:bg-zinc-900/40 border-zinc-200/50 dark:border-zinc-805/30'
+                  }`}>
+                  {publishedDashboards.map((db) => {
+                    const isSelected = db.id === selectedDashboardId;
+                    return (
+                      <button
+                        key={db.id}
+                        onClick={() => setSelectedDashboardId(db.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-center truncate ${isSelected
+                            ? activeTheme ? activeTheme.sidebarActive : 'bg-zinc-900 text-white'
+                            : activeTheme ? activeTheme.sidebarInactive : 'text-zinc-555 dark:text-zinc-450 hover:text-zinc-900'
+                          }`}
+                        title={db.name}
+                      >
+                        {db.name}
+                      </button>
+                    );
+                  })}
+                </nav>
+
+                {publishedDashboards.length > 5 && (
+                  <div className="flex flex-col items-center justify-center shrink-0 text-zinc-400 dark:text-zinc-500 animate-bounce pr-1" title="Scroll down for more dashboards">
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </div>
+                )}
+              </div>
             )}
           </header>
         )}         <main className={`flex-1 flex gap-6 overflow-hidden ${isPresentationMode ? 'p-0' : 'p-6'}`}>
