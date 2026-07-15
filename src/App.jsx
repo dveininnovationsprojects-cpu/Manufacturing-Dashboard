@@ -1274,7 +1274,7 @@ export default function App() {
     return (
       <div className={`h-screen overflow-hidden bg-gradient-to-br ${activeTheme.bg} ${activeTheme.text} flex`}>
         <aside className={`w-64 h-screen border-r flex flex-col justify-between p-5 shrink-0 select-none ${activeTheme.sidebar}`}>
-          <div className="space-y-6">
+          <div className="flex flex-col flex-1 min-h-0 overflow-y-auto space-y-6 pr-1 pb-4">
             <div className={`px-2 py-3 border-b ${activeTheme.sidebarBorder} flex items-center ${customLogo ? 'justify-center' : 'gap-2'}`}>
               {customLogo ? (
                 <img src={customLogo} alt="Logo" className="h-10 max-w-[190px] object-contain rounded-lg" />
@@ -1369,7 +1369,11 @@ export default function App() {
 
           {/* Bottom Profile Card & Logout */}
           <div className={`pt-4 border-t ${activeTheme.sidebarBorder} flex items-center justify-between gap-2 overflow-hidden`}>
-            <div className="flex items-center gap-2.5 overflow-hidden">
+            <div 
+              onClick={() => setActivePage('profile')}
+              className="flex items-center gap-2.5 overflow-hidden cursor-pointer hover:opacity-80 active:opacity-60 transition-all"
+              title="View Profile"
+            >
               <img
                 src={profile.avatar || DEFAULT_AVATAR}
                 alt="Profile"
